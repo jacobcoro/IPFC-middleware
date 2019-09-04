@@ -27,9 +27,8 @@ class GetSalt(Resource):
             salt_query = "SELECT salt FROM admin.users WHERE email = %s"
             cursor.execute(salt_query, (email,))
             stored_salt = cursor.fetchone()[0]
-            print(stored_salt)
-            print(stored_salt.strip('"'))
-            return stored_salt
+            result = str(stored_salt).strip('"')
+            return result
 
 
 class GetUserID(Resource):
