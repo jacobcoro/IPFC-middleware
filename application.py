@@ -90,14 +90,17 @@ class VerifySignup(Resource):
             exists = cursor.fetchone()[0]
             if exists:
                 conn.close()
-                return "email_exists"
+                result = "email_exists"
+                return result
             else:
                 cursor.execute('''INSERT INTO admin.users(user_id, email, key, salt, pinata_api, pinata_key) 
                                VALUES (%s, %s, %s, %s, %s, %s)''',
                                (new_user_id, new_email, key, new_salt, pinata_api, pinata_key))
                 conn.commit()
                 conn.close()
-                return "success"
+                result = "success"
+                return result
+
 
 
 api.add_resource(GetSalt, '/getsalt')
