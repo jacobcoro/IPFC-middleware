@@ -70,9 +70,40 @@ class VerifyLogin(Resource):
             # over 9 times, lock for a day
 
 
+class VerifySignup(Resource):
+    def get(self):
+        try:
+            conn = psycopg2.connect(IPFCdatabase_login)
+            cursor = conn.cursor()
+        except:
+            result = "Unable to connect to the database"
+            return result
+        else:
+            new_user_id = request.form['new_user_id']
+            new_email = request.form['new_email']
+            key = request.form['key']
+            new_salt = request.form['new_salt']
+            pinata_api = request.form['pinata_api']
+            pinata_key = request.form['pinata_key']
+            email_exists_query = "SELECT EXISTS (SELECT * FROM admin.users WHERE email = %s)"
+            cursor.execute(email_exists_query, (new_email,))
+            exists = cursor.fetchone()[0]
+            if exists:
+                conn.close()
+                return "email_exists"
+            else:
+                cursor.execute('''INSERT INTO admin.users(user_id, email, key, salt, pinata_api, pinata_key) 
+                               VALUES (%s, %s, %s, %s, %s, %s)''',
+                               (new_user_id, new_email, key, new_salt, pinata_api, pinata_key))
+                conn.commit()
+                conn.close()
+                return "success"
+
+
 api.add_resource(GetSalt, '/getsalt')
 api.add_resource(GetUserID, '/getuserid')
 api.add_resource(VerifyLogin, '/verifylogin')
+api.add_resource(VerifySignup, '/verifysignup')
 
 if __name__ == '__main__':
     app.run(debug=True)
