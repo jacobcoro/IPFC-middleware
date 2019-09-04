@@ -27,7 +27,8 @@ class GetSalt(Resource):
             salt_query = "SELECT salt FROM admin.users WHERE email = %s"
             cursor.execute(salt_query, (email,))
             stored_salt = cursor.fetchone()[0]
-            result = str(stored_salt).strip('"')
+            # cursor result had extra ""'s surrounding it for some reason
+            result = stored_salt.strip('"')
             return result
 
 
