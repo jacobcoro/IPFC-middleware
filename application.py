@@ -28,7 +28,7 @@ class GetSalt(Resource):
             cursor.execute(salt_query, (email,))
             stored_salt = cursor.fetchone()[0]
             # cursor result had extra ""'s surrounding it for some reason
-            result = stored_salt.strip('"')
+            result = stored_salt[1:-2]
             return result
 
 
