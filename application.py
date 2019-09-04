@@ -27,9 +27,7 @@ class GetSalt(Resource):
             salt_query = "SELECT salt FROM admin.users WHERE email = %s"
             cursor.execute(salt_query, (email,))
             stored_salt = cursor.fetchone()[0]
-            # cursor result had extra ""'s surrounding it for some reason
-            result = stored_salt[1:-2]
-            return result
+            return stored_salt
 
 
 class GetUserID(Resource):
@@ -59,11 +57,9 @@ class VerifyLogin(Resource):
         else:
             email = request.form['email']
             trial_key = request.form['key']
-            print(trial_key)
             key_query = "SELECT key FROM admin.users WHERE email = %s"
             cursor.execute(key_query, (email,))
             stored_key = cursor.fetchone()[0]
-            print(stored_key)
             if trial_key != stored_key:
                 conn.close()
                 return False
