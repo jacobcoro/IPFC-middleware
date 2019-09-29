@@ -121,7 +121,7 @@ class GetUserCollection(Resource):
             return result
         else:
             user_id = request.form['user_id']
-            query = "SELECT * FROM public.users WHERE user_id = %s"
+            query = "SELECT * FROM public.user_collections WHERE user_id = %s"
             cursor.execute(query, (user_id,))
             result = cursor.fetchall()
             return result
