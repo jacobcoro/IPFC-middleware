@@ -13,6 +13,16 @@ host='165.22.144.86'
 port='5432'
 """
 
+# class UploadDeck(Resource):
+#     def put(self):
+#         try:
+#             conn = psycopg2.connect(IPFCdatabase_login)
+#             cursor = conn.cursor()
+#         except:
+#             result = "Unable to connect to the database"
+#             return result
+#         else:
+
 
 class GetSalt(Resource):
     def get(self):
@@ -28,7 +38,6 @@ class GetSalt(Resource):
             cursor.execute(salt_query, (email,))
             stored_salt = cursor.fetchone()[0]
             return stored_salt
-
 
 class GetUserID(Resource):
     def get(self):
@@ -102,11 +111,26 @@ class VerifySignup(Resource):
                 return result
 
 
+class GetUserCollection(Resource):
+    def get(self):
+        try:
+            conn = psycopg2.connect(IPFCdatabase_login)
+            cursor = conn.cursor()
+        except:
+            result = "Unable to connect to the database"
+            return result
+        else:
+            user_id = request.form['user_id']
+            query = "SELECT * FROM public.users WHERE user_id = %s"
+            cursor.execute(query, (user_id,))
+            result = cursor.fetchall()
+            return result
 
 api.add_resource(GetSalt, '/getsalt')
 api.add_resource(GetUserID, '/getuserid')
 api.add_resource(VerifyLogin, '/verifylogin')
 api.add_resource(VerifySignup, '/verifysignup')
+api.add_resource(GetUserCollection, '/getusercollection')
 
 if __name__ == '__main__':
     app.run(debug=True)
