@@ -5,13 +5,22 @@ import psycopg2
 app = Flask(__name__)
 api = Api(app)
 
+# IPFCdatabase_login = """
+# dbname='IPFCdatabase'
+# user='jacob'
+# password='5w42bjnscjny8ufy'
+# host='165.22.144.86'
+# port='5432'
+# """
+
 IPFCdatabase_login = """
-dbname='IPFCdatabase' 
-user='jacob' 
-password='5w42bjnscjny8ufy'
-host='165.22.144.86'
+dbname='d8psd9fqa0qh2b' 
+user='gvzzuizrbhvhan' 
+password='47efd6af45d4c4d3736d06c2922cf00d17682c237ed8763d0d8b901d9449d169'
+host='ec2-107-22-160-185.compute-1.amazonaws.com'
 port='5432'
 """
+
 
 # class UploadDeck(Resource):
 #     def put(self):
