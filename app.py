@@ -76,18 +76,24 @@ class VerifyLogin(Resource):
         else:
             email = request.form['email']
             trial_key = request.form['key']
-            key_query = "SELECT key FROM admin.users WHERE email = %s"
-            cursor.execute(key_query, (email,))
-            stored_key = cursor.fetchone()[0]
-            if trial_key != stored_key:
-                conn.close()
-                return False
-            if trial_key == stored_key:
-                conn.close()
-                return True
-            # if enter wrong three times, wait 5 minutes. only one trial per minute.
-            # over 9 times, lock for a day
-
+            email_exists_query = "SELECT EXISTS (SELECT * FROM admin.users WHERE email = %s)"
+            cursor.execute(email_exists_query, (email,))
+            exists = cursor.fetchone()[0]
+            if exists:
+                key_query = "SELECT key FROM admin.users WHERE email = %s"
+                cursor.execute(key_query, (email,))
+                stored_key = cursor.fetchone()[0]
+                if trial_key != stored_key:
+                    conn.close()
+                    return False
+                if trial_key == stored_key:
+                    conn.close()
+                    return True
+                # if enter wrong three times, wait 5 minutes. only one trial per minute.
+                # over 9 times, lock for a day
+            else:
+                result = "email not found"
+                return result
 
 class VerifySignup(Resource):
     def get(self):
