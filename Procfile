@@ -1,1 +1,1 @@
-web gunicorn manage:app
+web: flask db upgrade; flask translate
