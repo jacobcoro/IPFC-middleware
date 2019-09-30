@@ -1,1 +1,1 @@
-web: flask db upgrade; flask translate compile; gunicorn ipfc-midware:app
+web: flask db upgrade; flask translate compile; gunicorn application:app
