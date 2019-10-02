@@ -139,7 +139,7 @@ class GetDeck(Resource):
             deck_id = request.form['deck_id']
             query = "SELECT title, edited, deck FROM public.decks WHERE deck_id = %s"
             cursor.execute(query, (deck_id,))
-            result = cursor.fetchone()[0]
+            result = cursor.fetchone()
             return result
 
 # class UploadDeck(Resource):
