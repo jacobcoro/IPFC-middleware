@@ -6,14 +6,6 @@ import uwsgi
 app = Flask(__name__)
 api = Api(app)
 
-# IPFCdatabase_login = """
-# dbname='IPFCdatabase'
-# user='jacob'
-# password='5w42bjnscjny8ufy'
-# host='165.22.144.86'
-# port='5432'
-# """
-
 IPFCdatabase_login = """
 dbname='d8psd9fqa0qh2b' 
 user='gvzzuizrbhvhan' 
@@ -135,20 +127,20 @@ class GetUserCollection(Resource):
             return result
 
 
-class GetDecks(Resource):
-    def get(self):
-        try:
-            conn = psycopg2.connect(IPFCdatabase_login)
-            cursor = conn.cursor()
-        except:
-            result = "Unable to connect to the database"
-            return result
-        else:
-            deck_id = request.form['deck_id']
-            query = "SELECT title, edited, deck FROM public.decks WHERE deck_id = %s"
-            cursor.execute(query, (deck_id,))
-            result = cursor.fetchone()[0]
-            return result
+# class GetDecks(Resource):
+#     def get(self):
+#         try:
+#             conn = psycopg2.connect(IPFCdatabase_login)
+#             cursor = conn.cursor()
+#         except:
+#             result = "Unable to connect to the database"
+#             return result
+#         else:
+#             deck_id = request.form['deck_id']
+#             query = "SELECT title, edited, deck FROM public.decks WHERE deck_id = %s"
+#             cursor.execute(query, (deck_id,))
+#             result = cursor.fetchone()[0]
+#             return result
 
 # class UploadDeck(Resource):
 #     def put(self):
@@ -165,7 +157,7 @@ api.add_resource(GetUserID, '/getuserid')
 api.add_resource(VerifyLogin, '/verifylogin')
 api.add_resource(VerifySignup, '/verifysignup')
 api.add_resource(GetUserCollection, '/getusercollection')
-api.add_resource(GetSalt, '/getdecks')
+# api.add_resource(GetSalt, '/getdecks')
 
 
 if __name__ == '__main__':
