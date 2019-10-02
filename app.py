@@ -147,7 +147,7 @@ class GetDecks(Resource):
             deck_id = request.form['deck_id']
             query = "SELECT deck, edited FROM public.decks WHERE deck_id = %s"
             cursor.execute(query, (deck_id,))
-            result = cursor.fetchall()
+            result = cursor.fetchone()
             return result
 
 # class UploadDeck(Resource):
@@ -165,6 +165,8 @@ api.add_resource(GetUserID, '/getuserid')
 api.add_resource(VerifyLogin, '/verifylogin')
 api.add_resource(VerifySignup, '/verifysignup')
 api.add_resource(GetUserCollection, '/getusercollection')
+api.add_resource(GetSalt, '/getdecks')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
