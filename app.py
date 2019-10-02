@@ -110,7 +110,7 @@ class VerifySignup(Resource):
                 return result
 
 
-class GetUserCollection(Resource):
+class UserCollection(Resource):
     """currently just gets the user's associated deck ID's. Later will also get their SR info"""
     def get(self):
         try:
@@ -127,7 +127,7 @@ class GetUserCollection(Resource):
             return result
 
 
-class GetDeck(Resource):
+class Deck(Resource):
     def get(self):
         try:
             conn = psycopg2.connect(IPFCdatabase_login)
@@ -142,22 +142,57 @@ class GetDeck(Resource):
             result = cursor.fetchall()
             return result
 
-# class UploadDeck(Resource):
-#     def put(self):
-#         try:
-#             conn = psycopg2.connect(IPFCdatabase_login)
-#             cursor = conn.cursor()
-#         except:
-#             result = "Unable to connect to the database"
-#             return result
-#         else:
+    def post(self):
+        try:
+            conn = psycopg2.connect(IPFCdatabase_login)
+            cursor = conn.cursor()
+        except:
+            result = "Unable to connect to the database"
+            return result
+        else:
+            deck_id = request.form['deck_id']
+            title = request.form['title']
+            edited = request.form['edited']
+            deck = request.form['deck']
+            cursor.execute('''INSERT INTO public.decks(deck_id, title, edited, deck) 
+                                VALUES (%s, %s, %s, %s)''',
+                           (deck_id, title, edited, deck))
+            conn.commit()
+            conn.close()
+            result = "success"
+            return result
+
+    def put(self):
+        try:
+            conn = psycopg2.connect(IPFCdatabase_login)
+            cursor = conn.cursor()
+        except:
+            result = "Unable to connect to the database"
+            return result
+        else:
+            deck_id = request.form['deck_id']
+            title = request.form['title']
+            edited = request.form['edited']
+            deck = request.form['deck']
+            cursor.execute('''UPDATE public.decks 
+                              SET title = %s 
+                              SET edited = %s
+                              SET deck = %s
+                              WHERE deck_id = %s
+                              VALUES (%s, %s, %s, %s)''',
+                           (title, edited, deck, deck_id))
+            conn.commit()
+            conn.close()
+            result = "success"
+            return result
 
 api.add_resource(GetSalt, '/getsalt')
 api.add_resource(GetUserID, '/getuserid')
 api.add_resource(VerifyLogin, '/verifylogin')
 api.add_resource(VerifySignup, '/verifysignup')
-api.add_resource(GetUserCollection, '/getusercollection')
-api.add_resource(GetDeck, '/getdeck')
+api.add_resource(UserCollection, '/usercollection')
+api.add_resource(Deck, '/deck')
+
 
 
 if __name__ == '__main__':
