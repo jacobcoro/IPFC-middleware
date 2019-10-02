@@ -145,7 +145,7 @@ class GetDecks(Resource):
             return result
         else:
             deck_id = request.form['deck_id']
-            query = "SELECT deck, edited FROM public.decks WHERE deck_id = %s"
+            query = "SELECT title, edited, deck FROM public.decks WHERE deck_id = %s"
             cursor.execute(query, (deck_id,))
             result = cursor.fetchone()[0]
             return result
