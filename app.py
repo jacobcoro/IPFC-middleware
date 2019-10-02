@@ -127,20 +127,20 @@ class GetUserCollection(Resource):
             return result
 
 
-# class GetDecks(Resource):
-#     def get(self):
-#         try:
-#             conn = psycopg2.connect(IPFCdatabase_login)
-#             cursor = conn.cursor()
-#         except:
-#             result = "Unable to connect to the database"
-#             return result
-#         else:
-#             deck_id = request.form['deck_id']
-#             query = "SELECT title, edited, deck FROM public.decks WHERE deck_id = %s"
-#             cursor.execute(query, (deck_id,))
-#             result = cursor.fetchone()[0]
-#             return result
+class GetDeck(Resource):
+    def get(self):
+        try:
+            conn = psycopg2.connect(IPFCdatabase_login)
+            cursor = conn.cursor()
+        except:
+            result = "Unable to connect to the database"
+            return result
+        else:
+            deck_id = request.form['deck_id']
+            query = "SELECT title, edited, deck FROM public.decks WHERE deck_id = %s"
+            cursor.execute(query, (deck_id,))
+            result = cursor.fetchone()[0]
+            return result
 
 # class UploadDeck(Resource):
 #     def put(self):
@@ -157,7 +157,7 @@ api.add_resource(GetUserID, '/getuserid')
 api.add_resource(VerifyLogin, '/verifylogin')
 api.add_resource(VerifySignup, '/verifysignup')
 api.add_resource(GetUserCollection, '/getusercollection')
-# api.add_resource(GetSalt, '/getdecks')
+api.add_resource(GetDeck, '/getdeck')
 
 
 if __name__ == '__main__':
