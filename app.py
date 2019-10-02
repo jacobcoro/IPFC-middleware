@@ -131,7 +131,7 @@ class GetUserCollection(Resource):
             user_id = request.form['user_id']
             query = "SELECT deck_ids FROM public.user_collections WHERE user_id = %s"
             cursor.execute(query, (user_id,))
-            result = cursor.fetchall()[0]
+            result = cursor.fetchone()[0]
             return result
 
 
@@ -147,7 +147,7 @@ class GetDecks(Resource):
             deck_id = request.form['deck_id']
             query = "SELECT deck, edited FROM public.decks WHERE deck_id = %s"
             cursor.execute(query, (deck_id,))
-            result = cursor.fetchone()
+            result = cursor.fetchone()[0]
             return result
 
 # class UploadDeck(Resource):
