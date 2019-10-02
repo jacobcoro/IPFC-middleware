@@ -23,17 +23,6 @@ port='5432'
 """
 
 
-# class UploadDeck(Resource):
-#     def put(self):
-#         try:
-#             conn = psycopg2.connect(IPFCdatabase_login)
-#             cursor = conn.cursor()
-#         except:
-#             result = "Unable to connect to the database"
-#             return result
-#         else:
-
-
 class GetSalt(Resource):
     def get(self):
         try:
@@ -48,6 +37,7 @@ class GetSalt(Resource):
             cursor.execute(salt_query, (email,))
             stored_salt = cursor.fetchone()[0]
             return stored_salt
+
 
 class GetUserID(Resource):
     def get(self):
@@ -95,6 +85,7 @@ class VerifyLogin(Resource):
                 result = "email not found"
                 return result
 
+
 class VerifySignup(Resource):
     def get(self):
         try:
@@ -128,6 +119,7 @@ class VerifySignup(Resource):
 
 
 class GetUserCollection(Resource):
+    """currently just gets the user's associated deck ID's. Later will also get their SR info"""
     def get(self):
         try:
             conn = psycopg2.connect(IPFCdatabase_login)
@@ -139,8 +131,34 @@ class GetUserCollection(Resource):
             user_id = request.form['user_id']
             query = "SELECT deck_ids FROM public.user_collections WHERE user_id = %s"
             cursor.execute(query, (user_id,))
+            result = cursor.fetchone()[0]
+            return result
+
+
+class GetDecks(Resource):
+    def get(self):
+        try:
+            conn = psycopg2.connect(IPFCdatabase_login)
+            cursor = conn.cursor()
+        except:
+            result = "Unable to connect to the database"
+            return result
+        else:
+            deck_id = request.form['deck_id']
+            query = "SELECT deck, edited FROM public.decks WHERE deck_id = %s"
+            cursor.execute(query, (deck_id,))
             result = cursor.fetchall()
             return result
+
+# class UploadDeck(Resource):
+#     def put(self):
+#         try:
+#             conn = psycopg2.connect(IPFCdatabase_login)
+#             cursor = conn.cursor()
+#         except:
+#             result = "Unable to connect to the database"
+#             return result
+#         else:
 
 api.add_resource(GetSalt, '/getsalt')
 api.add_resource(GetUserID, '/getuserid')
