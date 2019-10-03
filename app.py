@@ -155,8 +155,7 @@ class PostDeck(Resource):
             title = request.form['title']
             edited = request.form['edited']
             deck = request.form['deck']
-            cursor.execute('''INSERT INTO public.decks(deck_id, title, edited, deck) 
-                                VALUES (%s, %s, %s, %s)''',
+            cursor.execute('''INSERT INTO public.decks(%s, %s, %s, %s)''',
                            (deck_id, title, edited, deck))
             conn.commit()
             conn.close()
