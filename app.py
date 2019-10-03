@@ -156,8 +156,10 @@ class PostDeck(Resource):
             deck_id = request.form['deck_id']
             title = request.form['title']
             edited = request.form['edited']
-            deck = json.loads(request.form['deck'])
-            cursor.execute('''INSERT INTO public.decks(deck_id, title, edited, deck) VALUES(%s, %s, %s, %s)''',
+            deck = request.form['deck']
+            cursor.execute('''INSERT INTO public.decks 
+            (deck_id, title, edited, deck) 
+            VALUES(%s, %s, %s, %s)''',
                            (deck_id, title, edited, deck))
             conn.commit()
             cursor.close()
@@ -197,8 +199,8 @@ api.add_resource(VerifyLogin, '/verifylogin')
 api.add_resource(VerifySignup, '/verifysignup')
 api.add_resource(UserCollection, '/usercollection')
 api.add_resource(GetDeck, '/getdeck')
-api.add_resource(PutDeck, '/putdeck')
 api.add_resource(PostDeck, '/postdeck')
+api.add_resource(PutDeck, '/putdeck')
 
 if __name__ == '__main__':
     app.run(debug=True)
