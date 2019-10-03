@@ -143,6 +143,7 @@ class GetDeck(Resource):
             result = cursor.fetchall()
             return result
 
+
 class PostDeck(Resource):
     def post(self):
         try:
@@ -159,9 +160,10 @@ class PostDeck(Resource):
             cursor.execute('''INSERT INTO public.decks VALUES(%s, %s, %s, %s)''',
                            (deck_id, title, edited, deck))
             conn.commit()
-            conn.close()
+            cursor.close()
             result = "success"
             return result
+
 
 class PutDeck(Resource):
     def put(self):
