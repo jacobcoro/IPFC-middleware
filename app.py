@@ -127,7 +127,7 @@ class UserCollection(Resource):
             return result
 
 
-class Deck(Resource):
+class GetDeck(Resource):
     def get(self):
         try:
             conn = psycopg2.connect(IPFCdatabase_login)
@@ -142,6 +142,7 @@ class Deck(Resource):
             result = cursor.fetchall()
             return result
 
+class PostDeck(Resource):
     def post(self):
         try:
             conn = psycopg2.connect(IPFCdatabase_login)
@@ -162,6 +163,7 @@ class Deck(Resource):
             result = "success"
             return result
 
+class PutDeck(Resource):
     def put(self):
         try:
             conn = psycopg2.connect(IPFCdatabase_login)
@@ -186,14 +188,15 @@ class Deck(Resource):
             result = "success"
             return result
 
+
 api.add_resource(GetSalt, '/getsalt')
 api.add_resource(GetUserID, '/getuserid')
 api.add_resource(VerifyLogin, '/verifylogin')
 api.add_resource(VerifySignup, '/verifysignup')
 api.add_resource(UserCollection, '/usercollection')
-api.add_resource(Deck, '/deck')
-
-
+api.add_resource(GetDeck, '/getdeck')
+api.add_resource(PutDeck, '/putdeck')
+api.add_resource(PostDeck, '/postdeck')
 
 if __name__ == '__main__':
     app.run(debug=True)
