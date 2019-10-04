@@ -164,6 +164,20 @@ class GetDeck(Resource):
             result = cursor.fetchall()
             return result
 
+class GetDecks(Resource):
+    def get(self):
+        try:
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+            cursor = conn.cursor()
+        except:
+            result = "Unable to connect to the database"
+            return result
+        else:
+            deck_id = request.form['deck_id']
+            query = "SELECT * FROM public.decks WHERE deck_id = %s"
+            cursor.execute(query, (deck_id,))
+            result = cursor.fetchall()
+            return result
 
 class PostDeck(Resource):
     def post(self):
@@ -220,6 +234,7 @@ api.add_resource(VerifyLogin, '/verifylogin')
 api.add_resource(VerifySignup, '/verifysignup')
 api.add_resource(UserCollection, '/usercollection')
 api.add_resource(GetDeck, '/getdeck')
+api.add_resource(GetDecks, '/getdecks')
 api.add_resource(PostDeck, '/postdeck')
 api.add_resource(PutDeck, '/putdeck')
 
