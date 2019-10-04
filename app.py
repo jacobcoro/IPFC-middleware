@@ -136,14 +136,30 @@ class UserCollection(Resource):
             result = "Unable to connect to the database"
             return result
         else:
-            deck_id = request.form['deck_id']
-            title = request.form['title']
-            edited = request.form['edited']
-            deck = request.form['deck']
-            cursor.execute('''INSERT INTO public.decks 
-            (deck_id, title, edited, deck) 
-            VALUES(%s, %s, %s, %s)''',
-                           (deck_id, title, edited, json.dumps(deck)))
+            user_id = request.form['user_id']
+            deck_ids = request.form['deck_ids']
+            cursor.execute('''INSERT INTO public.user_collections 
+            (user_id, deck_ids) 
+            VALUES(%s, %s)''', (user_id, deck_ids))
+            conn.commit()
+            cursor.close()
+            result = "success"
+            return result
+
+    def put(self):
+        try:
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+            cursor = conn.cursor()
+        except:
+            result = "Unable to connect to the database"
+            return result
+        else:
+            user_id = request.form['user_id']
+            deck_ids = request.form['deck_ids']
+            cursor.execute('''UPDATE public.user_collections
+            SET deck_ids = %s
+            WHERE user_id = %s
+            VALUES(%s, %s)''', (user_id, deck_ids))
             conn.commit()
             cursor.close()
             result = "success"
@@ -195,7 +211,7 @@ class PostDeck(Resource):
             cursor.execute('''INSERT INTO public.decks 
             (deck_id, title, edited, deck) 
             VALUES(%s, %s, %s, %s)''',
-                           (deck_id, title, edited, json.dumps(deck)))
+                           (deck_id, title, edited, deck))
             conn.commit()
             cursor.close()
             result = "success"
