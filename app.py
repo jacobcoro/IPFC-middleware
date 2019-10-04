@@ -146,6 +146,7 @@ class UserCollection(Resource):
             result = "success"
             return deck_ids
 
+class PutUserCollection(Resource):
     def put(self):
         try:
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -158,10 +159,11 @@ class UserCollection(Resource):
             deck_ids = request.form['deck_ids']
             statement = ('''UPDATE public.user_collections
             SET deck_ids = (%s)
-            WHERE user_id = (%s)''', (deck_ids, user_id))
+            WHERE user_id = (%s) ''', (str(deck_ids), user_id))
             cursor.execute(statement)
             conn.commit()
             cursor.close()
+            print(request.form)
             result = "success"
             return deck_ids
 
@@ -251,6 +253,7 @@ api.add_resource(GetUserID, '/getuserid')
 api.add_resource(VerifyLogin, '/verifylogin')
 api.add_resource(VerifySignup, '/verifysignup')
 api.add_resource(UserCollection, '/usercollection')
+api.add_resource(PutUserCollection, '/putusercollection')
 api.add_resource(GetDeck, '/getdeck')
 api.add_resource(GetDecks, '/getdecks')
 api.add_resource(PostDeck, '/postdeck')
