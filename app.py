@@ -128,6 +128,26 @@ class UserCollection(Resource):
             result = cursor.fetchone()[0]
             return result
 
+    def post(self):
+        try:
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+            cursor = conn.cursor()
+        except:
+            result = "Unable to connect to the database"
+            return result
+        else:
+            deck_id = request.form['deck_id']
+            title = request.form['title']
+            edited = request.form['edited']
+            deck = request.form['deck']
+            cursor.execute('''INSERT INTO public.decks 
+            (deck_id, title, edited, deck) 
+            VALUES(%s, %s, %s, %s)''',
+                           (deck_id, title, edited, json.dumps(deck)))
+            conn.commit()
+            cursor.close()
+            result = "success"
+            return result
 
 class GetDeck(Resource):
     def get(self):
@@ -139,7 +159,7 @@ class GetDeck(Resource):
             return result
         else:
             deck_id = request.form['deck_id']
-            query = "SELECT title, edited, deck FROM public.decks WHERE deck_id = %s"
+            query = "SELECT deck FROM public.decks WHERE deck_id = %s"
             cursor.execute(query, (deck_id,))
             result = cursor.fetchall()
             return result
