@@ -1,7 +1,6 @@
 from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 import psycopg2
-from psycopg2.extras import Json
 import os
 import json
 import uwsgi
@@ -156,15 +155,16 @@ class UserCollection(Resource):
             return result
         else:
             user_id = request.form['user_id']
-            deck_ids = json.dumps(request.form['deck_ids'])
+            deck_ids = request.form['deck_ids']
             cursor.execute('''UPDATE public.user_collections
             SET deck_ids = %s
             WHERE user_id = %s
-            VALUES(%s, %s)''', (user_id, deck_ids))
+            VALUES(%s, %s)''', (user_id, json.dumps(deck_ids)))
             conn.commit()
             cursor.close()
             result = "success"
-            return deck_ids
+            return json.dumps(deck_ids)
+
 
 class GetDeck(Resource):
     def get(self):
@@ -180,6 +180,7 @@ class GetDeck(Resource):
             cursor.execute(query, (deck_id,))
             result = cursor.fetchone()[0]
             return result
+
 
 class GetDecks(Resource):
     def get(self):
