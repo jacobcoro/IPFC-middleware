@@ -213,11 +213,11 @@ class PostDeck(Resource):
             cursor.execute('''INSERT INTO public.decks 
             (deck_id, title, edited, deck) 
             VALUES(%s, %s, %s, %s)''',
-                           (deck_id, title, edited, json.dumps(deck)))
+                           (deck_id, title, edited, deck))
             conn.commit()
             cursor.close()
             result = "success"
-            return json.dumps(deck)
+            return deck
 
 
 class PutDeck(Resource):
