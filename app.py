@@ -141,11 +141,11 @@ class UserCollection(Resource):
             deck_ids = request.form['deck_ids']
             cursor.execute('''INSERT INTO public.user_collections 
             (user_id, deck_ids) 
-            VALUES(%s, %s)''', (user_id, deck_ids))
+            VALUES(%s, %s)''', (user_id, json.dumps(deck_ids)))
             conn.commit()
             cursor.close()
             result = "success"
-            return result
+            return json.dumps(deck_ids)
 
     def put(self):
         try:
@@ -208,15 +208,15 @@ class PostDeck(Resource):
             deck_id = request.form['deck_id']
             title = request.form['title']
             edited = request.form['edited']
-            deck = Json(request.form['deck'])
+            deck = request.form['deck']
             cursor.execute('''INSERT INTO public.decks 
             (deck_id, title, edited, deck) 
             VALUES(%s, %s, %s, %s)''',
-                           (deck_id, title, edited, deck))
+                           (deck_id, title, edited, json.dumps(deck)))
             conn.commit()
             cursor.close()
             result = "success"
-            return deck
+            return json.dumps(deck)
 
 
 class PutDeck(Resource):
