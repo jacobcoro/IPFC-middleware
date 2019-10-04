@@ -1,25 +1,26 @@
 from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 import psycopg2
+import os
 import json
 import uwsgi
 
 app = Flask(__name__)
 api = Api(app)
 
-IPFCdatabase_login = """
-dbname='d8psd9fqa0qh2b' 
-user='gvzzuizrbhvhan' 
-password='47efd6af45d4c4d3736d06c2922cf00d17682c237ed8763d0d8b901d9449d169'
-host='ec2-107-22-160-185.compute-1.amazonaws.com'
-port='5432'
-"""
-
+# IPFCdatabase_login = """
+# dbname='d8psd9fqa0qh2b'
+# user='gvzzuizrbhvhan'
+# password='47efd6af45d4c4d3736d06c2922cf00d17682c237ed8763d0d8b901d9449d169'
+# host='ec2-107-22-160-185.compute-1.amazonaws.com'
+# port='5432'
+# """
+DATABASE_URL = os.environ['DATABASE_URL']
 
 class GetSalt(Resource):
     def get(self):
         try:
-            conn = psycopg2.connect(IPFCdatabase_login)
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             cursor = conn.cursor()
         except:
             result = "Unable to connect to the database"
@@ -35,7 +36,7 @@ class GetSalt(Resource):
 class GetUserID(Resource):
     def get(self):
         try:
-            conn = psycopg2.connect(IPFCdatabase_login)
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             cursor = conn.cursor()
         except:
             result = "Unable to connect to the database"
@@ -51,7 +52,7 @@ class GetUserID(Resource):
 class VerifyLogin(Resource):
     def get(self):
         try:
-            conn = psycopg2.connect(IPFCdatabase_login)
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             cursor = conn.cursor()
         except:
             result = "Unable to connect to the database"
@@ -82,7 +83,7 @@ class VerifyLogin(Resource):
 class VerifySignup(Resource):
     def get(self):
         try:
-            conn = psycopg2.connect(IPFCdatabase_login)
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             cursor = conn.cursor()
         except:
             result = "Unable to connect to the database"
@@ -115,7 +116,7 @@ class UserCollection(Resource):
     """currently just gets the user's associated deck ID's. Later will also get their SR info"""
     def get(self):
         try:
-            conn = psycopg2.connect(IPFCdatabase_login)
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             cursor = conn.cursor()
         except:
             result = "Unable to connect to the database"
@@ -131,7 +132,7 @@ class UserCollection(Resource):
 class GetDeck(Resource):
     def get(self):
         try:
-            conn = psycopg2.connect(IPFCdatabase_login)
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             cursor = conn.cursor()
         except:
             result = "Unable to connect to the database"
@@ -147,7 +148,7 @@ class GetDeck(Resource):
 class PostDeck(Resource):
     def post(self):
         try:
-            conn = psycopg2.connect(IPFCdatabase_login)
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             cursor = conn.cursor()
         except:
             result = "Unable to connect to the database"
@@ -170,7 +171,7 @@ class PostDeck(Resource):
 class PutDeck(Resource):
     def put(self):
         try:
-            conn = psycopg2.connect(IPFCdatabase_login)
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             cursor = conn.cursor()
         except:
             result = "Unable to connect to the database"
