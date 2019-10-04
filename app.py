@@ -209,7 +209,7 @@ class PostDeck(Resource):
             deck_id = request.form['deck_id']
             title = request.form['title']
             edited = request.form['edited']
-            deck = json.loads(request.form['deck'])
+            deck = request.form['deck']
             cursor.execute('''INSERT INTO public.decks 
             (deck_id, title, edited, deck) 
             VALUES(%s, %s, %s, %s)''',
