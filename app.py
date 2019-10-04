@@ -1,6 +1,7 @@
 from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 import psycopg2
+from psycopg2.extras import Json
 import os
 import json
 import uwsgi
@@ -211,11 +212,11 @@ class PostDeck(Resource):
             cursor.execute('''INSERT INTO public.decks 
             (deck_id, title, edited, deck) 
             VALUES(%s, %s, %s, %s)''',
-                           (deck_id, title, edited, json.dumps(deck)))
+                           (deck_id, title, edited, Json(deck)))
             conn.commit()
             cursor.close()
             result = "success"
-            return result
+            return Json(deck)
 
 
 class PutDeck(Resource):
