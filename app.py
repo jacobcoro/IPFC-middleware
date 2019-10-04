@@ -144,7 +144,7 @@ class UserCollection(Resource):
             conn.commit()
             cursor.close()
             result = "success"
-            return json.dumps(deck_ids)
+            return deck_ids
 
     def put(self):
         try:
@@ -163,7 +163,7 @@ class UserCollection(Resource):
             conn.commit()
             cursor.close()
             result = "success"
-            return json.dumps(deck_ids)
+            return deck_ids
 
 
 class GetDeck(Resource):
