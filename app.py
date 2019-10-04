@@ -157,7 +157,7 @@ class PutUserCollection(Resource):
         else:
             user_id = request.form['user_id']
             deck_ids = request.form['deck_ids']
-            statement = "UPDATE public.user_collections SET deck_ids = %s WHERE user_id = %s", deck_ids, user_id
+            statement = str("UPDATE public.user_collections SET deck_ids = %s WHERE user_id = %s", deck_ids, user_id)
             cursor.execute(statement)
             conn.commit()
             cursor.close()
