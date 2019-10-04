@@ -161,7 +161,7 @@ class GetDeck(Resource):
             deck_id = request.form['deck_id']
             query = "SELECT deck FROM public.decks WHERE deck_id = %s"
             cursor.execute(query, (deck_id,))
-            result = cursor.fetchall()
+            result = cursor.fetchone()[0]
             return result
 
 class GetDecks(Resource):
