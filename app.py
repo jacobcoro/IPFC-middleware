@@ -158,8 +158,7 @@ class UserCollection(Resource):
             deck_ids = request.form['deck_ids']
             statement = ('''UPDATE public.user_collections
             SET deck_ids = (%s)
-            WHERE user_id = (%s)
-            VALUES(%s, %s)''', (deck_ids, user_id))
+            WHERE user_id = (%s)''', (deck_ids, user_id))
             cursor.execute(statement)
             conn.commit()
             cursor.close()
