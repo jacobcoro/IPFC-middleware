@@ -208,15 +208,15 @@ class PostDeck(Resource):
             deck_id = request.form['deck_id']
             title = request.form['title']
             edited = request.form['edited']
-            deck = request.form['deck']
+            deck = Json(request.form['deck'])
             cursor.execute('''INSERT INTO public.decks 
             (deck_id, title, edited, deck) 
             VALUES(%s, %s, %s, %s)''',
-                           (deck_id, title, edited, Json(deck)))
+                           (deck_id, title, edited, deck))
             conn.commit()
             cursor.close()
             result = "success"
-            return Json(deck)
+            return deck
 
 
 class PutDeck(Resource):
