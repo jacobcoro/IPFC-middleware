@@ -156,15 +156,15 @@ class UserCollection(Resource):
             return result
         else:
             user_id = request.form['user_id']
-            deck_ids = request.form['deck_ids']
+            deck_ids = json.dumps(request.form['deck_ids'])
             cursor.execute('''UPDATE public.user_collections
             SET deck_ids = %s
             WHERE user_id = %s
-            VALUES(%s, %s)''', (user_id, json.dumps(deck_ids)))
+            VALUES(%s, %s)''', (user_id, deck_ids))
             conn.commit()
             cursor.close()
             result = "success"
-            return result
+            return deck_ids
 
 class GetDeck(Resource):
     def get(self):
