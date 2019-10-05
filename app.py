@@ -236,8 +236,7 @@ class PutDeck(Resource):
                               SET title = %s 
                               SET edited = %s
                               SET deck = %s
-                              WHERE deck_id = %s
-                              VALUES (%s, %s, %s, %s)''',
+                              WHERE deck_id = %s''',
                            (title, edited, deck, deck_id))
             conn.commit()
             conn.close()
