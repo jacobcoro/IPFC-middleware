@@ -232,12 +232,14 @@ class PutDeck(Resource):
             title = request.form['title']
             edited = request.form['edited']
             deck = request.form['deck']
-            cursor.execute('''UPDATE public.decks 
-                              SET title = %s 
-                              SET edited = %s
-                              SET deck = %s
-                              WHERE deck_id = %s''',
-                           (title, edited, deck, deck_id))
+            # cursor.execute('''UPDATE public.decks
+            #                   SET title = %s
+            #                   SET edited = %s
+            #                   SET deck = %s
+            #                   WHERE deck_id = %s''',
+            #                (title, edited, deck, deck_id))
+            statement = "UPDATE public.decks SET title = %s SET edited = %s SET deck = %s WHERE deck_id = %s"
+            cursor.execute(statement, (title, edited, deck, deck_id))
             conn.commit()
             conn.close()
             result = "success"
