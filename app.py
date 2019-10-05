@@ -238,7 +238,7 @@ class PutDeck(Resource):
             #                   SET deck = %s
             #                   WHERE deck_id = %s''',
             #                (title, edited, deck, deck_id))
-            statement = "UPDATE public.decks SET title = %s SET edited = %s SET deck = %s WHERE deck_id = %s"
+            statement = "UPDATE public.decks SET title = %s, edited = %s, deck = %s WHERE deck_id = %s"
             cursor.execute(statement, (title, edited, deck, deck_id))
             conn.commit()
             conn.close()
