@@ -197,7 +197,7 @@ class GetDecks(Resource):
             for deck_id in deck_ids:
                 query = "SELECT deck FROM public.decks WHERE deck_id = %s"
                 cursor.execute(query, (deck_id,))
-                result = cursor.fetchall()
+                result = cursor.fetchone()[0]
                 decks.append(result)
             return decks
 
