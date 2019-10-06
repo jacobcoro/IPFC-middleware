@@ -199,7 +199,7 @@ class GetDecks(Resource):
                 cursor.execute(query, (deck_id,))
                 result = cursor.fetchone()
                 decks.append(result)
-            return deck_ids
+            return decks
 
 class PostDeck(Resource):
     def post(self):
