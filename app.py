@@ -123,7 +123,7 @@ class UserCollection(Resource):
             return result
         else:
             user_id = request.form['user_id']
-            query = "SELECT deck_ids FROM public.user_collections WHERE user_id = %s"
+            query = "SELECT * FROM public.user_collections WHERE user_id = %s"
             cursor.execute(query, (user_id,))
             result = cursor.fetchone()[0]
             return result
@@ -138,9 +138,10 @@ class UserCollection(Resource):
         else:
             user_id = request.form['user_id']
             deck_ids = request.form['deck_ids']
+            all_decks_cids = request.form['all_deck_cids']
             cursor.execute('''INSERT INTO public.user_collections 
-            (user_id, deck_ids) 
-            VALUES(%s, %s)''', (user_id, deck_ids))
+            (user_id, deck_ids, all_deck_cids) 
+            VALUES(%s, %s, %s)''', (user_id, deck_ids, all_decks_cids))
             conn.commit()
             cursor.close()
             result = "success"
@@ -157,8 +158,9 @@ class PutUserCollection(Resource):
         else:
             user_id = request.form['user_id']
             deck_ids = request.form['deck_ids']
-            statement = "UPDATE public.user_collections SET deck_ids = %s WHERE user_id = %s"
-            cursor.execute(statement, (deck_ids, user_id))
+            all_decks_cids = request.form['all_deck_cids']
+            statement = "UPDATE public.user_collections SET deck_ids = %s, all_deck_cids = %s WHERE user_id = %s"
+            cursor.execute(statement, (deck_ids, all_decks_cids, user_id))
             conn.commit()
             cursor.close()
             result = "success"
@@ -208,11 +210,12 @@ class PostDeck(Resource):
             deck_id = request.form['deck_id']
             title = request.form['title']
             edited = request.form['edited']
+            deck_cid = request.form['deck_cid']
             deck = request.form['deck']
             cursor.execute('''INSERT INTO public.decks 
-            (deck_id, title, edited, deck) 
+            (deck_id, title, edited, deck_cid, deck) 
             VALUES(%s, %s, %s, %s)''',
-                           (deck_id, title, edited, deck))
+                           (deck_id, title, edited, deck_cid, deck))
             conn.commit()
             cursor.close()
             result = "success"
@@ -231,15 +234,10 @@ class PutDeck(Resource):
             deck_id = request.form['deck_id']
             title = request.form['title']
             edited = request.form['edited']
+            deck_cid = request.form['deck_cid']
             deck = request.form['deck']
-            # cursor.execute('''UPDATE public.decks
-            #                   SET title = %s
-            #                   SET edited = %s
-            #                   SET deck = %s
-            #                   WHERE deck_id = %s''',
-            #                (title, edited, deck, deck_id))
-            statement = "UPDATE public.decks SET title = %s, edited = %s, deck = %s WHERE deck_id = %s"
-            cursor.execute(statement, (title, edited, deck, deck_id))
+            statement = "UPDATE public.decks SET title = %s, edited = %s, deck = %s deck_cid = %s WHERE deck_id = %s"
+            cursor.execute(statement, (title, edited, deck, deck_cid, deck_id))
             conn.commit()
             conn.close()
             result = "success"
