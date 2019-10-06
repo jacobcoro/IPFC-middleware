@@ -192,7 +192,7 @@ class GetDecks(Resource):
             result = "Unable to connect to the database"
             return result
         else:
-            deck_ids = json.loads(request.form['deck_ids'])
+            deck_ids = request.form['deck_ids']
             decks = []
             for deck_id in deck_ids:
                 query = "SELECT deck FROM public.decks WHERE deck_id = %s"
