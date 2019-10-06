@@ -192,11 +192,14 @@ class GetDecks(Resource):
             result = "Unable to connect to the database"
             return result
         else:
-            deck_id = request.form['deck_id']
-            query = "SELECT deck FROM public.decks WHERE deck_id = %s"
-            cursor.execute(query, (deck_id,))
-            result = cursor.fetchall()
-            return result
+            deck_ids = request.form['deck_ids']
+            decks = []
+            for deck_id in deck_ids:
+                query = "SELECT deck FROM public.decks WHERE deck_id = %s"
+                cursor.execute(query, (deck_id,))
+                result = cursor.fetchall()
+                decks.append(result)
+            return decks
 
 class PostDeck(Resource):
     def post(self):
