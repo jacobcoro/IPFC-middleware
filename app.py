@@ -247,6 +247,25 @@ class PutDeck(Resource):
             return result
 
 
+class PutDeckCID(Resource):
+    def put(self):
+        try:
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+            cursor = conn.cursor()
+        except:
+            result = "Unable to connect to the database"
+            return result
+        else:
+            deck_id = request.form['deck_id']
+            deck_cid = request.form['deck_cid']
+            statement = "UPDATE public.decks deck_cid = %s WHERE deck_id = %s"
+            cursor.execute(statement, (deck_cid, deck_id))
+            conn.commit()
+            conn.close()
+            result = "success"
+            return result
+
+
 api.add_resource(GetSalt, '/getsalt')
 api.add_resource(GetUserID, '/getuserid')
 api.add_resource(VerifyLogin, '/verifylogin')
@@ -257,6 +276,7 @@ api.add_resource(GetDeck, '/getdeck')
 api.add_resource(GetDecks, '/getdecks')
 api.add_resource(PostDeck, '/postdeck')
 api.add_resource(PutDeck, '/putdeck')
+api.add_resource(PutDeckCID, '/putdeckcid')
 
 if __name__ == '__main__':
     app.run(debug=True)
