@@ -239,7 +239,7 @@ class PutDeck(Resource):
             edited = request.form['edited']
             deck_cid = request.form['deck_cid']
             deck = request.form['deck']
-            statement = "UPDATE public.decks SET title = %s, edited = %s, deck = %s deck_cid = %s WHERE deck_id = %s"
+            statement = "UPDATE public.decks SET title = %s, edited = %s, deck = %s, deck_cid = %s WHERE deck_id = %s"
             cursor.execute(statement, (title, edited, deck, deck_cid, deck_id))
             conn.commit()
             conn.close()
@@ -259,7 +259,7 @@ class PutDeckCID(Resource):
         else:
             deck_id = request.form['deck_id']
             deck_cid = request.form['deck_cid']
-            statement = "UPDATE public.decks deck_cid = %s WHERE deck_id = %s"
+            statement = "UPDATE public.decks SET deck_cid = %s WHERE deck_id = %s"
             cursor.execute(statement, (deck_cid, deck_id))
             conn.commit()
             conn.close()
