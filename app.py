@@ -65,7 +65,7 @@ class VerifyLogin(Resource):
                     email = request.form['email']
                     user_info_query = "SELECT pinata_key, pinata_api, user_id FROM admin.users WHERE email = %s"
                     cursor.execute(user_info_query, (email,))
-                    user_info = cursor.fetchone()[0]
+                    user_info = cursor.fetchone()
                     conn.close()
                     return user_info
                 if trial_key != stored_key:
