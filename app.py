@@ -61,12 +61,15 @@ class VerifyLogin(Resource):
                 key_query = "SELECT key FROM admin.users WHERE email = %s"
                 cursor.execute(key_query, (email,))
                 stored_key = cursor.fetchone()[0]
+                if trial_key == stored_key:
+                    pinata_key_query = "SELECT pinata_key, pinata_api FROM admin.users WHERE email = %s"
+                    cursor.execute(pinata_key_query, (email,))
+                    pinata_info = cursor.fetchone()[0]
+                    conn.close()
+                    return pinata_info
                 if trial_key != stored_key:
                     conn.close()
                     return False
-                if trial_key == stored_key:
-                    conn.close()
-                    return True
                 # if enter wrong three times, wait 5 minutes. only one trial per minute.
                 # over 9 times, lock for a day
             else:
