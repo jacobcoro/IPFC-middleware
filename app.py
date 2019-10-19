@@ -65,7 +65,7 @@ class VerifyLogin(Resource):
                     email = request.form['email']
                     user_info_query = "SELECT * FROM admin.users WHERE email = %s"
                     cursor.execute(user_info_query, (email,))
-                    user_info = cursor.fetchone()[0]
+                    user_info = cursor.fetchone()
                     conn.close()
                     return user_info
                 if trial_key != stored_key:
@@ -95,7 +95,7 @@ class VerifySignup(Resource):
             pinata_key = request.form['pinata_key']
             email_exists_query = "SELECT EXISTS (SELECT * FROM admin.users WHERE email = %s)"
             cursor.execute(email_exists_query, (new_email,))
-            exists = cursor.fetchone()[0]
+            exists = cursor.fetchall()[0]
             if exists:
                 conn.close()
                 result = "email_exists"
