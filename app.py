@@ -37,7 +37,7 @@ class GetUserID(Resource):
             return result
         else:
             email = request.form['email']
-            user_id_query = "SELECT user_id FROM admin.users WHERE email = %s"
+            user_id_query = "SELECT pinata_key, pinata_api, user_id FROM admin.users WHERE email = %s"
             cursor.execute(user_id_query, (email,))
             user_id = cursor.fetchone()[0]
             return user_id
@@ -62,11 +62,12 @@ class VerifyLogin(Resource):
                 cursor.execute(key_query, (email,))
                 stored_key = cursor.fetchone()[0]
                 if trial_key == stored_key:
-                    pinata_key_query = "SELECT pinata_key, pinata_api FROM admin.users WHERE email = %s"
-                    cursor.execute(pinata_key_query, (email,))
-                    pinata_info = cursor.fetchone()[0]
+                    email = request.form['email']
+                    user_info_query = "SELECT pinata_key, pinata_api, user_id FROM admin.users WHERE email = %s"
+                    cursor.execute(user_info_query, (email,))
+                    user_info = cursor.fetchone()[0]
                     conn.close()
-                    return pinata_info
+                    return user_info
                 if trial_key != stored_key:
                     conn.close()
                     return False
