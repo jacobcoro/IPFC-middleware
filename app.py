@@ -9,8 +9,6 @@ app = Flask(__name__)
 api = Api(app)
 DATABASE_URL = os.environ['DATABASE_URL']
 
-# add API call to get pinata keys, maybe as the default response to verify login?
-
 class GetSalt(Resource):
     def get(self):
         try:
@@ -26,22 +24,21 @@ class GetSalt(Resource):
             stored_salt = cursor.fetchone()[0]
             return stored_salt
 
-
-class GetUserID(Resource):
-    def get(self):
-        try:
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
-        except:
-            result = "Unable to connect to the database"
-            return result
-        else:
-            email = request.form['email']
-            user_id_query = "SELECT pinata_key, pinata_api, user_id FROM admin.users WHERE email = %s"
-            cursor.execute(user_id_query, (email,))
-            user_id = cursor.fetchone()[0]
-            return user_id
-
+# Added this function to verify login
+# class GetUserID(Resource):
+#     def get(self):
+#         try:
+#             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+#             cursor = conn.cursor()
+#         except:
+#             result = "Unable to connect to the database"
+#             return result
+#         else:
+#             email = request.form['email']
+#             user_id_query = "SELECT pinata_key, pinata_api, user_id FROM admin.users WHERE email = %s"
+#             cursor.execute(user_id_query, (email,))
+#             user_id = cursor.fetchone()[0]
+#             return user_id
 
 class VerifyLogin(Resource):
     def get(self):
@@ -145,6 +142,7 @@ class UserCollection(Resource):
             result = "success"
             return deck_ids
 
+
 class PutUserCollection(Resource):
     def put(self):
         try:
@@ -199,6 +197,7 @@ class GetDecks(Resource):
                 decks.append(result)
             return decks
 
+
 class PostDeck(Resource):
     def post(self):
         try:
@@ -245,7 +244,6 @@ class PutDeck(Resource):
             return result
 
 
-
 class PutDeckCID(Resource):
     def put(self):
         try:
@@ -266,7 +264,7 @@ class PutDeckCID(Resource):
 
 
 api.add_resource(GetSalt, '/getsalt')
-api.add_resource(GetUserID, '/getuserid')
+# api.add_resource(GetUserID, '/getuserid')
 api.add_resource(VerifyLogin, '/verifylogin')
 api.add_resource(VerifySignup, '/verifysignup')
 api.add_resource(UserCollection, '/usercollection')
