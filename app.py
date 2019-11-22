@@ -1,17 +1,16 @@
 from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 import psycopg2
 import os
 import json
 import uwsgi
 
 app = Flask(__name__)
-CORS(app, support_credentials=True)
+CORS(app)
 api = Api(app)
 DATABASE_URL = os.environ['DATABASE_URL']
 
-@cross_origin(supports_credentials=True)
 class GetSalt(Resource):
     def get(self):
         try:
@@ -43,7 +42,6 @@ class GetSalt(Resource):
 #             user_id = cursor.fetchone()[0]
 #             return user_id
 
-@cross_origin(supports_credentials=True)
 class VerifyLogin(Resource):
     def get(self):
         try:
@@ -78,7 +76,6 @@ class VerifyLogin(Resource):
                 result = "email not found"
                 return result
 
-@cross_origin(supports_credentials=True)
 class VerifySignup(Resource):
     def get(self):
         try:
@@ -110,7 +107,6 @@ class VerifySignup(Resource):
                 result = "success"
                 return result
 
-@cross_origin(supports_credentials=True)
 class UserCollection(Resource):
     """currently just gets the user's associated deck ID's. Later will also get their SR info"""
     def get(self):
@@ -146,7 +142,6 @@ class UserCollection(Resource):
             result = "success"
             return deck_ids
 
-@cross_origin(supports_credentials=True)
 class PutUserCollection(Resource):
     def put(self):
         try:
@@ -166,7 +161,6 @@ class PutUserCollection(Resource):
             result = "success"
             return deck_ids
 
-@cross_origin(supports_credentials=True)
 class GetDeck(Resource):
     def get(self):
         try:
@@ -182,7 +176,6 @@ class GetDeck(Resource):
             result = cursor.fetchone()[0]
             return result
 
-@cross_origin(supports_credentials=True)
 class GetDecks(Resource):
     def get(self):
         try:
@@ -201,7 +194,6 @@ class GetDecks(Resource):
                 decks.append(result)
             return decks
 
-@cross_origin(supports_credentials=True)
 class PostDeck(Resource):
     def post(self):
         try:
@@ -225,7 +217,6 @@ class PostDeck(Resource):
             result = "success"
             return deck
 
-@cross_origin(supports_credentials=True)
 class PutDeck(Resource):
     def put(self):
         try:
@@ -247,7 +238,6 @@ class PutDeck(Resource):
             result = "success"
             return result
 
-@cross_origin(supports_credentials=True)
 class PutDeckCID(Resource):
     def put(self):
         try:
