@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_restful import Resource, Api, reqparse
-from flask_restful.utils import cors
-# from flask_cors import CORS, cross_origin
+# from flask_restful.utils import cors
+from flask_cors import CORS, cross_origin
 import psycopg2
 import os
 import json
@@ -9,8 +9,8 @@ import uwsgi
 
 app = Flask(__name__)
 api = Api(app)
-# CORS(api)
-api.decorators = [cors.crossdomain(origin='*')]
+CORS(api)
+# api.decorators = [cors.crossdomain(origin='*')]
 DATABASE_URL = os.environ['DATABASE_URL']
 
 class GetSalt(Resource):
