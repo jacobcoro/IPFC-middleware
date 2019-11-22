@@ -9,7 +9,7 @@ import uwsgi
 
 app = Flask(__name__)
 api = Api(app)
-app.decorators=[cors.crossdomain(origin='*')]
+api.decorators = [cors.crossdomain(origin='*')]
 DATABASE_URL = os.environ['DATABASE_URL']
 
 class GetSalt(Resource):
