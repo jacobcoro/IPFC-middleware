@@ -9,6 +9,7 @@ import uwsgi
 
 app = Flask(__name__)
 api = Api(app)
+CORS(api)
 # api.decorators = [cors.crossdomain(origin='*')]
 DATABASE_URL = os.environ['DATABASE_URL']
 
