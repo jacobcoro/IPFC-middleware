@@ -1,6 +1,5 @@
-from flask import Flask, request, jsonify
-from flask_restful import Resource, Api, reqparse
-# from flask_restful.utils import cors
+from flask import Flask, request
+from flask_restful import Resource, Api
 from flask_cors import CORS, cross_origin
 import psycopg2
 import os
@@ -10,12 +9,10 @@ import uwsgi
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
-
-# api.decorators = [cors.crossdomain(origin='*')]
 DATABASE_URL = os.environ['DATABASE_URL']
 
 class GetSalt(Resource):
-    # @cross_origin(origin='*')
+    @cross_origin(origin='*')
     def get(self):
         try:
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -28,9 +25,9 @@ class GetSalt(Resource):
             salt_query = "SELECT salt FROM admin.users WHERE email = %s"
             cursor.execute(salt_query, (email,))
             stored_salt = cursor.fetchone()[0]
-            return jsonify(stored_salt)
+            return stored_salt
 
-# Added this function to verify login
+# Already added this function to verify login
 # class GetUserID(Resource):
 #     def get(self):
 #         try:
@@ -78,7 +75,7 @@ class VerifyLogin(Resource):
                 # over 9 times, lock for a day
             else:
                 result = "email not found"
-                return jsonify(result)
+                return result
 
 class VerifySignup(Resource):
     def get(self):
@@ -109,7 +106,7 @@ class VerifySignup(Resource):
                 conn.commit()
                 conn.close()
                 result = "success"
-                return jsonify(result)
+                return result
 
 class UserCollection(Resource):
     """currently just gets the user's associated deck ID's. Later will also get their SR info"""
