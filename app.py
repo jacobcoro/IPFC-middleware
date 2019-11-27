@@ -267,7 +267,7 @@ class GetSalt(Resource):
             cursor.execute(salt_query, (email,))
             stored_salt = cursor.fetchone()[0]
             return stored_salt
-        check_conn_and_continue(logic)
+        return check_conn_and_continue(logic)
 
 
 def check_conn_and_continue(api_logic):
