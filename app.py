@@ -266,8 +266,9 @@ class PutDeckCID(Resource):
 class GetSalt1(Resource):
     def get(self):
         try:
-            args = parser.parse_args()
-            email = args['email']
+            email = request.args.get('email')
+            # args = parser.parse_args()
+            # email = args['email']
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             cursor = conn.cursor()
             salt_query = "SELECT salt FROM admin.users WHERE email = %s"
