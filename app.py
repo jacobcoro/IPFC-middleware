@@ -10,8 +10,8 @@ app = Flask(__name__)
 CORS(app)
 api = Api(app)
 DATABASE_URL = os.environ['DATABASE_URL']
-# get_salt_parser = reqparse.RequestParser()
-# get_salt_parser.add_argument('email')
+get_salt_parser = reqparse.RequestParser()
+get_salt_parser.add_argument('email')
 
 
 class GetSaltOld(Resource):
@@ -261,28 +261,37 @@ class PutDeckCID(Resource):
             return result
 
 
+class GetSalt1(Resource):
+    def get(self, email):
+        try:
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+            cursor = conn.cursor()
+            salt_query = "SELECT salt FROM admin.users WHERE email = %s"
+            cursor.execute(salt_query, (email,))
+            return cursor.fetchone()[0]
+        except:
+            result = "Unable to connect to the database"
+            return result
+
+
 class GetSalt(Resource):
     def get(self):
-        def logic(cursor):
+        try:
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+            cursor = conn.cursor()
             email = request.form['email']
             salt_query = "SELECT salt FROM admin.users WHERE email = %s"
             cursor.execute(salt_query, (email,))
-            stored_salt = cursor.fetchone()[0]
-            return stored_salt
-        return check_conn_and_continue(logic)
+            return cursor.fetchone()[0]
+        except:
+            result = "Unable to connect to the database"
+            return result
 
 
-def check_conn_and_continue(api_logic):
-    try:
-        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-        cursor = conn.cursor()
-    except:
-        result = "Unable to connect to the database"
-        return result
-    else:
-        return api_logic(cursor)
+
 
 api.add_resource(GetSalt, '/getsalt')
+api.add_resource(GetSalt, '/getsalt1')
 
 # for checking exists
 # abort(404, message="___ {} doesn't exist".format(____))
