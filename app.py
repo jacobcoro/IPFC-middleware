@@ -10,11 +10,6 @@ app = Flask(__name__)
 CORS(app)
 api = Api(app)
 DATABASE_URL = os.environ['DATABASE_URL']
-# parser = reqparse.RequestParser()
-# parser.add_argument('email')
-# parser.add_argument('password')
-# parser.add_argument('email')
-# args = parser.parse_args()
 
 class GetSaltOld(Resource):
     @cross_origin(origin='*')
@@ -263,34 +258,19 @@ class PutDeckCID(Resource):
             return result
 
 
-class GetSalt1(Resource):
-    def get(self):
-        try:
-            email = request.args.get('email')
-            # args = parser.parse_args()
-            # email = args['email']
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
-            salt_query = "SELECT salt FROM admin.users WHERE email = %s"
-            cursor.execute(salt_query, (email,))
-            return cursor.fetchone()[0]
-        except:
-            result = "Unable to connect to the database"
-            return result
-
-
 class GetSalt(Resource):
     def get(self):
         try:
+            email = request.args.get('email')
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             cursor = conn.cursor()
-            email = request.form['email']
             salt_query = "SELECT salt FROM admin.users WHERE email = %s"
             cursor.execute(salt_query, (email,))
             return cursor.fetchone()[0]
         except:
             result = "Unable to connect to the database"
             return result
+
 
 # class VerifyLogin(Resource):
 #     def get(self):
@@ -329,7 +309,7 @@ class GetSalt(Resource):
 
 
 api.add_resource(GetSalt, '/getsalt')
-api.add_resource(GetSalt1, '/getsalt1')
+
 
 # for checking exists
 # abort(404, message="___ {} doesn't exist".format(____))
