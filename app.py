@@ -11,7 +11,8 @@ CORS(app)
 api = Api(app)
 DATABASE_URL = os.environ['DATABASE_URL']
 
-class GetSalt(Resource):
+
+class GetSaltOld(Resource):
     @cross_origin(origin='*')
     def get(self):
         try:
@@ -258,7 +259,28 @@ class PutDeckCID(Resource):
             return result
 
 
-api.add_resource(GetSalt, '/getsalt')
+class GetSalt(Resource):
+    def get(self):
+        def logic(cursor):
+            email = request.form['email']
+            salt_query = "SELECT salt FROM admin.users WHERE email = %s"
+            cursor.execute(salt_query, (email,))
+            stored_salt = cursor.fetchone()[0]
+            return stored_salt
+        check_conn_and_continue(logic)
+
+
+def check_conn_and_continue(api_logic):
+    try:
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        cursor = conn.cursor()
+    except:
+        result = "Unable to connect to the database"
+        return result
+    else:
+        api_logic(cursor)
+
+api.add_resource(GetSaltOld, '/getsaltold')
 # api.add_resource(GetUserID, '/getuserid')
 api.add_resource(VerifyLogin, '/verifylogin')
 api.add_resource(VerifySignup, '/verifysignup')
