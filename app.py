@@ -1,5 +1,5 @@
 from flask import Flask, request
-from flask_restful import Resource, Api
+from flask_restful import Resource, Api, reqparse, abort
 from flask_cors import CORS, cross_origin
 import psycopg2
 import os
@@ -10,6 +10,8 @@ app = Flask(__name__)
 CORS(app)
 api = Api(app)
 DATABASE_URL = os.environ['DATABASE_URL']
+# get_salt_parser = reqparse.RequestParser()
+# get_salt_parser.add_argument('email')
 
 
 class GetSaltOld(Resource):
@@ -278,9 +280,12 @@ def check_conn_and_continue(api_logic):
         result = "Unable to connect to the database"
         return result
     else:
-        api_logic(cursor)
+        return api_logic(cursor)
 
 api.add_resource(GetSalt, '/getsalt')
+
+# for checking exists
+# abort(404, message="___ {} doesn't exist".format(____))
 
 api.add_resource(GetSaltOld, '/getsaltold')
 # api.add_resource(GetUserID, '/getuserid')
