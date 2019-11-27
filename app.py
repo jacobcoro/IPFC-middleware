@@ -10,8 +10,8 @@ app = Flask(__name__)
 CORS(app)
 api = Api(app)
 DATABASE_URL = os.environ['DATABASE_URL']
-get_salt_parser = reqparse.RequestParser()
-get_salt_parser.add_argument('email')
+parser = reqparse.RequestParser()
+parser.add_argument('email')
 
 
 class GetSaltOld(Resource):
@@ -287,11 +287,44 @@ class GetSalt(Resource):
             result = "Unable to connect to the database"
             return result
 
+# class VerifyLogin(Resource):
+#     def get(self):
+#         try:
+#             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+#             cursor = conn.cursor()
+#         except:
+#             result = "Unable to connect to the database"
+#             return result
+#         else:
+#             email = request.form['email']
+#             trial_key = request.form['key']
+#             email_exists_query = "SELECT EXISTS (SELECT * FROM admin.users WHERE email = %s)"
+#             cursor.execute(email_exists_query, (email,))
+#             exists = cursor.fetchone()[0]
+#             if exists:
+#                 key_query = "SELECT key FROM admin.users WHERE email = %s"
+#                 cursor.execute(key_query, (email,))
+#                 stored_key = cursor.fetchone()[0]
+#                 if trial_key == stored_key:
+#                     email = request.form['email']
+#                     user_info_query = "SELECT * FROM admin.users WHERE email = %s"
+#                     cursor.execute(user_info_query, (email,))
+#                     user_info = cursor.fetchone()
+#                     conn.close()
+#                     return user_info
+#                 if trial_key != stored_key:
+#                     conn.close()
+#                     return False
+#                 # if enter wrong three times, wait 5 minutes. only one trial per minute.
+#                 # over 9 times, lock for a day
+#             else:
+#                 result = "email not found"
+#                 return result
 
 
 
 api.add_resource(GetSalt, '/getsalt')
-api.add_resource(GetSalt, '/getsalt1')
+api.add_resource(GetSalt1, '/getsalt1')
 
 # for checking exists
 # abort(404, message="___ {} doesn't exist".format(____))
