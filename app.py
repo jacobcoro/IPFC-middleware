@@ -43,7 +43,7 @@ class GetSaltOld(Resource):
 #             user_id = cursor.fetchone()[0]
 #             return user_id
 
-class VerifyLogin(Resource):
+class VerifyLoginOld(Resource):
     def get(self):
         try:
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -272,43 +272,42 @@ class GetSalt(Resource):
             return result
 
 
-# class VerifyLogin(Resource):
-#     def get(self):
-#         try:
-#             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-#             cursor = conn.cursor()
-#         except:
-#             result = "Unable to connect to the database"
-#             return result
-#         else:
-#             email = request.form['email']
-#             trial_key = request.form['key']
-#             email_exists_query = "SELECT EXISTS (SELECT * FROM admin.users WHERE email = %s)"
-#             cursor.execute(email_exists_query, (email,))
-#             exists = cursor.fetchone()[0]
-#             if exists:
-#                 key_query = "SELECT key FROM admin.users WHERE email = %s"
-#                 cursor.execute(key_query, (email,))
-#                 stored_key = cursor.fetchone()[0]
-#                 if trial_key == stored_key:
-#                     email = request.form['email']
-#                     user_info_query = "SELECT * FROM admin.users WHERE email = %s"
-#                     cursor.execute(user_info_query, (email,))
-#                     user_info = cursor.fetchone()
-#                     conn.close()
-#                     return user_info
-#                 if trial_key != stored_key:
-#                     conn.close()
-#                     return False
-#                 # if enter wrong three times, wait 5 minutes. only one trial per minute.
-#                 # over 9 times, lock for a day
-#             else:
-#                 result = "email not found"
-#                 return result
-
+class VerifyLogin(Resource):
+    def get(self):
+        try:
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+            cursor = conn.cursor()
+            email = request.args.get('email')
+            trial_key = request.args.get('key')
+            email_exists_query = "SELECT EXISTS (SELECT * FROM admin.users WHERE email = %s)"
+            cursor.execute(email_exists_query, (email,))
+            exists = cursor.fetchone()[0]
+            if exists:
+                key_query = "SELECT key FROM admin.users WHERE email = %s"
+                cursor.execute(key_query, (email,))
+                stored_key = cursor.fetchone()[0]
+                if trial_key == stored_key:
+                    email = request.form['email']
+                    user_info_query = "SELECT * FROM admin.users WHERE email = %s"
+                    cursor.execute(user_info_query, (email,))
+                    user_info = cursor.fetchone()
+                    conn.close()
+                    return user_info
+                if trial_key != stored_key:
+                    conn.close()
+                    return False
+                # if enter wrong three times, wait 5 minutes. only one trial per minute.
+                # over 9 times, lock for a day
+            else:
+                result = "email not found"
+            return result
+        except:
+            result = "Unable to connect to the database"
+            return result
 
 
 api.add_resource(GetSalt, '/getsalt')
+api.add_resource(VerifyLogin, '/verifylogin')
 
 
 # for checking exists
@@ -316,7 +315,7 @@ api.add_resource(GetSalt, '/getsalt')
 
 api.add_resource(GetSaltOld, '/getsaltold')
 # api.add_resource(GetUserID, '/getuserid')
-api.add_resource(VerifyLogin, '/verifylogin')
+api.add_resource(VerifyLoginOld, '/verifyloginold')
 api.add_resource(VerifySignup, '/verifysignup')
 api.add_resource(UserCollection, '/usercollection')
 api.add_resource(PutUserCollection, '/putusercollection')
