@@ -12,7 +12,9 @@ api = Api(app)
 DATABASE_URL = os.environ['DATABASE_URL']
 parser = reqparse.RequestParser()
 parser.add_argument('email')
-
+parser.add_argument('password')
+parser.add_argument('email')
+args = parser.parse_args()
 
 class GetSaltOld(Resource):
     @cross_origin(origin='*')
@@ -262,8 +264,10 @@ class PutDeckCID(Resource):
 
 
 class GetSalt1(Resource):
-    def get(self, email):
+    def get(self):
         try:
+            args = parser.parse_args()
+            email = args['email']
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             cursor = conn.cursor()
             salt_query = "SELECT salt FROM admin.users WHERE email = %s"
