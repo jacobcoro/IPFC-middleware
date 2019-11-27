@@ -275,10 +275,10 @@ class GetSalt(Resource):
 class VerifyLogin(Resource):
     def get(self):
         try:
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
             email = request.args.get('email')
             trial_key = request.args.get('key')
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+            cursor = conn.cursor()
             email_exists_query = "SELECT EXISTS (SELECT * FROM admin.users WHERE email = %s)"
             cursor.execute(email_exists_query, (email,))
             exists = cursor.fetchone()[0]
@@ -287,7 +287,6 @@ class VerifyLogin(Resource):
                 cursor.execute(key_query, (email,))
                 stored_key = cursor.fetchone()[0]
                 if trial_key == stored_key:
-                    email = request.form['email']
                     user_info_query = "SELECT * FROM admin.users WHERE email = %s"
                     cursor.execute(user_info_query, (email,))
                     user_info = cursor.fetchone()
