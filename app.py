@@ -10,11 +10,11 @@ app = Flask(__name__)
 CORS(app)
 api = Api(app)
 DATABASE_URL = os.environ['DATABASE_URL']
-parser = reqparse.RequestParser()
-parser.add_argument('email')
-parser.add_argument('password')
-parser.add_argument('email')
-args = parser.parse_args()
+# parser = reqparse.RequestParser()
+# parser.add_argument('email')
+# parser.add_argument('password')
+# parser.add_argument('email')
+# args = parser.parse_args()
 
 class GetSaltOld(Resource):
     @cross_origin(origin='*')
