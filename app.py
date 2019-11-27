@@ -280,6 +280,8 @@ def check_conn_and_continue(api_logic):
     else:
         api_logic(cursor)
 
+api.add_resource(GetSalt, '/getsalt')
+
 api.add_resource(GetSaltOld, '/getsaltold')
 # api.add_resource(GetUserID, '/getuserid')
 api.add_resource(VerifyLogin, '/verifylogin')
