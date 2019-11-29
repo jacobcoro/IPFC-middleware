@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import BIGINT, JSONB, VARCHAR
+import psycopg2
 import uuid
 import bcrypt
 import jwt
