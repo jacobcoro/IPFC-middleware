@@ -105,7 +105,7 @@ def login():
     if not user:
         return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
-    if bcrypt.checkpw(auth.password.encode('utf8'), user.password_hash.encode('utf8')):
+    if bcrypt.checkpw(auth.password.encode('utf8'), user.password_hash):
         token = jwt.encode({'user_id': user.user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=15)},
                            app.config['SECRET_KEY'])
         return jsonify({'token': token.decode('UTF-8')})
