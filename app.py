@@ -1,328 +1,119 @@
-from flask import Flask, request
-from flask_restful import Resource, Api, reqparse, abort
-from flask_cors import CORS, cross_origin
-import psycopg2
+from flask import Flask, request, jsonify, make_response
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.dialects.postgresql import BIGINT, JSONB, VARCHAR
+import uuid
+import bcrypt
+import jwt
+import datetime
+from functools import wraps
 import os
-import json
 import uwsgi
+from flask_cors import CORS, cross_origin
+
 
 app = Flask(__name__)
+app.debug = True
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+app.config['SECRET_KEY'] = 'totally%@#$%^T@#Secure!'
 CORS(app)
-api = Api(app)
-DATABASE_URL = os.environ['DATABASE_URL']
 
-class GetSaltOld(Resource):
-    @cross_origin(origin='*')
-    def get(self):
+db = SQLAlchemy(app)
+
+class Users(db.Model):
+    __table_args__ = {'schema':'admin'}
+    user_id = db.Column(VARCHAR, primary_key=True)
+    email = db.Column(VARCHAR, required=True)
+    password_hash = db.Column(VARCHAR, required=True)
+    pinata_api = db.Column(VARCHAR)
+    pinata_key = db.Column(VARCHAR)
+    session_token = db.Column(JSONB)
+
+    def __init__(self, user_id, email, password_hash, pinata_api, pinata_key, session_token):
+        self.user_id = user_id
+        self.email = email
+        self.password_hash = password_hash
+        self.pinata_api = pinata_api
+        self.pinata_key = pinata_key
+        self.session_token = session_token
+
+class UserCollections(db.Model):
+    deck_id = db.Column(VARCHAR, primary_key=True)
+    sr_id = db.Column(VARCHAR)
+    deck_ids =  db.Column(JSONB)
+    all_deck_cids = db.Column(JSONB)
+    def __init__(self, deck_id, sr_id, deck_ids, all_deck_cids):
+        self.deck_id = deck_id
+        self.sr_id = sr_id
+        self.deck_ids =  deck_ids
+        self.all_deck_cids = all_deck_cids
+
+class Decks(db.Model):
+    deck_id = db.Column(VARCHAR, primary_key=True)
+    edited = db.Column(BIGINT, required=True)
+    deck_cid = db.Column(VARCHAR)
+    deck = db.Column(JSONB, required=True)
+    title = db.Column(VARCHAR, required=True)
+    def __init__(self, deck_id, edited, deck_cid, deck, title):
+        self.deck_id = deck_id
+        self.edited = edited
+        self.deck_cid = deck_cid
+        self.deck = deck
+        self.title = title
+
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+
+        if 'x-access-token' in request.headers:
+            token = request.headers['x-access-token']
+
+        if not token:
+            return jsonify({'message' : 'Token is missing!'}), 401
+
         try:
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
+            data = jwt.decode(token, app.config['SECRET_KEY'])
+            current_user = Users.query.filter_by(public_id=data['public_id']).first()
         except:
-            result = "Unable to connect to the database"
-            return result
-        else:
-            email = request.form['email']
-            salt_query = "SELECT salt FROM admin.users WHERE email = %s"
-            cursor.execute(salt_query, (email,))
-            stored_salt = cursor.fetchone()[0]
-            return stored_salt
+            return jsonify({'message' : 'Token is invalid!'}), 401
 
-# Already added this function to verify login
-# class GetUserID(Resource):
-#     def get(self):
-#         try:
-#             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-#             cursor = conn.cursor()
-#         except:
-#             result = "Unable to connect to the database"
-#             return result
-#         else:
-#             email = request.form['email']
-#             user_id_query = "SELECT pinata_key, pinata_api, user_id FROM admin.users WHERE email = %s"
-#             cursor.execute(user_id_query, (email,))
-#             user_id = cursor.fetchone()[0]
-#             return user_id
+        return f(current_user, *args, **kwargs)
 
-class VerifyLoginOld(Resource):
-    def get(self):
-        try:
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
-        except:
-            result = "Unable to connect to the database"
-            return result
-        else:
-            email = request.form['email']
-            trial_key = request.form['key']
-            email_exists_query = "SELECT EXISTS (SELECT * FROM admin.users WHERE email = %s)"
-            cursor.execute(email_exists_query, (email,))
-            exists = cursor.fetchone()[0]
-            if exists:
-                key_query = "SELECT key FROM admin.users WHERE email = %s"
-                cursor.execute(key_query, (email,))
-                stored_key = cursor.fetchone()[0]
-                if trial_key == stored_key:
-                    email = request.form['email']
-                    user_info_query = "SELECT * FROM admin.users WHERE email = %s"
-                    cursor.execute(user_info_query, (email,))
-                    user_info = cursor.fetchone()
-                    conn.close()
-                    return user_info
-                if trial_key != stored_key:
-                    conn.close()
-                    return False
-                # if enter wrong three times, wait 5 minutes. only one trial per minute.
-                # over 9 times, lock for a day
-            else:
-                result = "email not found"
-                return result
+    return decorated
 
-class VerifySignup(Resource):
-    def get(self):
-        try:
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
-        except:
-            result = "Unable to connect to the database"
-            return result
-        else:
-            new_user_id = request.form['new_user_id']
-            new_email = request.form['new_email']
-            key = request.form['key']
-            new_salt = request.form['new_salt']
-            pinata_api = request.form['pinata_api']
-            pinata_key = request.form['pinata_key']
-            email_exists_query = "SELECT EXISTS (SELECT * FROM admin.users WHERE email = %s)"
-            cursor.execute(email_exists_query, (new_email,))
-            exists = cursor.fetchall()[0]
-            if exists:
-                conn.close()
-                result = "email_exists"
-                return result
-            else:
-                cursor.execute('''INSERT INTO admin.users(user_id, email, key, salt, pinata_api, pinata_key) 
-                               VALUES (%s, %s, %s, %s, %s, %s)''',
-                               (new_user_id, new_email, key, new_salt, pinata_api, pinata_key))
-                conn.commit()
-                conn.close()
-                result = "success"
-                return result
+@app.route('/sign_up', methods=['POST'])
+def sign_up():
+    data = request.get_json()
+    hashed_password = bcrypt.hashpw(data['password'], bcrypt.gensalt())
+    new_user = Users(user_id=str(uuid.uuid4()), email=data['email'],
+                     password_hash=hashed_password, pinata_api=data['email'],
+                     pinata_key=data['pinata_key'], session_token=data['session_token'])
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({'message' : 'New user created!'})
 
-class UserCollection(Resource):
-    """currently just gets the user's associated deck ID's. Later will also get their SR info"""
-    def get(self):
-        try:
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
-        except:
-            result = "Unable to connect to the database"
-            return result
-        else:
-            user_id = request.form['user_id']
-            query = "SELECT * FROM public.user_collections WHERE user_id = %s"
-            cursor.execute(query, (user_id,))
-            result = cursor.fetchall()[0]
-            return result
+@app.route('/login')
+def login():
+    auth = request.authorization
 
-    def post(self):
-        try:
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
-        except:
-            result = "Unable to connect to the database"
-            return result
-        else:
-            user_id = request.form['user_id']
-            deck_ids = request.form['deck_ids']
-            all_decks_cids = request.form['all_deck_cids']
-            cursor.execute('''INSERT INTO public.user_collections 
-            (user_id, deck_ids, all_deck_cids) 
-            VALUES(%s, %s, %s)''', (user_id, deck_ids, all_decks_cids))
-            conn.commit()
-            cursor.close()
-            result = "success"
-            return deck_ids
+    if not auth or not auth.username or not auth.password:
+        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+    user = Users.query.filter_by(email=auth.username).first()
 
-class PutUserCollection(Resource):
-    def put(self):
-        try:
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
-        except:
-            result = "Unable to connect to the database"
-            return result
-        else:
-            user_id = request.form['user_id']
-            deck_ids = request.form['deck_ids']
-            all_decks_cids = request.form['all_deck_cids']
-            statement = "UPDATE public.user_collections SET deck_ids = %s, all_deck_cids = %s WHERE user_id = %s"
-            cursor.execute(statement, (deck_ids, all_decks_cids, user_id))
-            conn.commit()
-            cursor.close()
-            result = "success"
-            return deck_ids
+    if not user:
+        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
-class GetDeck(Resource):
-    def get(self):
-        try:
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
-        except:
-            result = "Unable to connect to the database"
-            return result
-        else:
-            deck_id = request.form['deck_id']
-            query = "SELECT deck FROM public.decks WHERE deck_id = %s"
-            cursor.execute(query, (deck_id,))
-            result = cursor.fetchone()[0]
-            return result
+    if bcrypt.checkpw(auth.password, user.password_hash):
+        token = jwt.encode({'user_id': user.user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=15)},
+                           app.config['SECRET_KEY'])
+        return jsonify({'token': token.decode('UTF-8')})
 
-class GetDecks(Resource):
-    def get(self):
-        try:
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
-        except:
-            result = "Unable to connect to the database"
-            return result
-        else:
-            deck_ids = json.loads(request.form['deck_ids'])
-            decks = []
-            for deck_id in deck_ids:
-                query = "SELECT deck FROM public.decks WHERE deck_id = %s"
-                cursor.execute(query, (deck_id,))
-                result = cursor.fetchone()[0]
-                decks.append(result)
-            return decks
-
-class PostDeck(Resource):
-    def post(self):
-        try:
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
-        except:
-            result = "Unable to connect to the database"
-            return result
-        else:
-            deck_id = request.form['deck_id']
-            title = request.form['title']
-            edited = request.form['edited']
-            deck_cid = request.form['deck_cid']
-            deck = request.form['deck']
-            cursor.execute('''INSERT INTO public.decks 
-            (deck_id, title, edited, deck_cid, deck) 
-            VALUES(%s, %s, %s, %s)''',
-                           (deck_id, title, edited, deck_cid, deck))
-            conn.commit()
-            cursor.close()
-            result = "success"
-            return deck
-
-class PutDeck(Resource):
-    def put(self):
-        try:
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
-        except:
-            result = "Unable to connect to the database"
-            return result
-        else:
-            deck_id = request.form['deck_id']
-            title = request.form['title']
-            edited = request.form['edited']
-            deck_cid = request.form['deck_cid']
-            deck = request.form['deck']
-            statement = "UPDATE public.decks SET title = %s, edited = %s, deck = %s, deck_cid = %s WHERE deck_id = %s"
-            cursor.execute(statement, (title, edited, deck, deck_cid, deck_id))
-            conn.commit()
-            conn.close()
-            result = "success"
-            return result
-
-class PutDeckCID(Resource):
-    def put(self):
-        try:
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
-        except:
-            result = "Unable to connect to the database"
-            return result
-        else:
-            deck_id = request.form['deck_id']
-            deck_cid = request.form['deck_cid']
-            statement = "UPDATE public.decks SET deck_cid = %s WHERE deck_id = %s"
-            cursor.execute(statement, (deck_cid, deck_id))
-            conn.commit()
-            conn.close()
-            result = "success"
-            return result
+    return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
 
-class GetSalt(Resource):
-    def get(self):
-        try:
-            email = request.args.get('email')
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
-            salt_query = "SELECT salt FROM admin.users WHERE email = %s"
-            cursor.execute(salt_query, (email,))
-            return cursor.fetchone()[0]
-        except:
-            result = "Unable to connect to the database"
-            return result
 
 
-class VerifyLogin(Resource):
-    def get(self):
-        try:
-            email = request.args.get('email')
-            trial_key = request.args.get('key')
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
-            email_exists_query = "SELECT EXISTS (SELECT * FROM admin.users WHERE email = %s)"
-            cursor.execute(email_exists_query, (email,))
-            exists = cursor.fetchone()[0]
-            if exists:
-                key_query = "SELECT key FROM admin.users WHERE email = %s"
-                cursor.execute(key_query, (email,))
-                stored_key = cursor.fetchone()[0]
-                if trial_key == stored_key:
-                    user_info_query = "SELECT * FROM admin.users WHERE email = %s"
-                    cursor.execute(user_info_query, (email,))
-                    user_info = cursor.fetchone()
-                    conn.close()
-                    return user_info
-                if trial_key != stored_key:
-                    conn.close()
-                    return False
-                # if enter wrong three times, wait 5 minutes. only one trial per minute.
-                # over 9 times, lock for a day
-            else:
-                result = "email not found"
-            return result
-        except:
-            result = "Unable to connect to the database"
-            return result
-
-
-api.add_resource(GetSalt, '/getsalt')
-api.add_resource(VerifyLogin, '/verifylogin')
-
-
-# for checking exists
-# abort(404, message="___ {} doesn't exist".format(____))
-
-api.add_resource(GetSaltOld, '/getsaltold')
-# api.add_resource(GetUserID, '/getuserid')
-api.add_resource(VerifyLoginOld, '/verifyloginold')
-api.add_resource(VerifySignup, '/verifysignup')
-api.add_resource(UserCollection, '/usercollection')
-api.add_resource(PutUserCollection, '/putusercollection')
-api.add_resource(GetDeck, '/getdeck')
-api.add_resource(GetDecks, '/getdecks')
-api.add_resource(PostDeck, '/postdeck')
-api.add_resource(PutDeck, '/putdeck')
-api.add_resource(PutDeckCID, '/putdeckcid')
 
 if __name__ == '__main__':
     app.run(debug=True)
