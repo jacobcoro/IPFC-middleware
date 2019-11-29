@@ -22,8 +22,8 @@ db = SQLAlchemy(app)
 class Users(db.Model):
     __table_args__ = {'schema':'admin'}
     user_id = db.Column(VARCHAR, primary_key=True)
-    email = db.Column(VARCHAR, required=True)
-    password_hash = db.Column(VARCHAR, required=True)
+    email = db.Column(VARCHAR)
+    password_hash = db.Column(VARCHAR)
     pinata_api = db.Column(VARCHAR)
     pinata_key = db.Column(VARCHAR)
     session_token = db.Column(JSONB)
@@ -49,10 +49,10 @@ class UserCollections(db.Model):
 
 class Decks(db.Model):
     deck_id = db.Column(VARCHAR, primary_key=True)
-    edited = db.Column(BIGINT, required=True)
+    edited = db.Column(BIGINT)
     deck_cid = db.Column(VARCHAR)
-    deck = db.Column(JSONB, required=True)
-    title = db.Column(VARCHAR, required=True)
+    deck = db.Column(JSONB)
+    title = db.Column(VARCHAR)
     def __init__(self, deck_id, edited, deck_cid, deck, title):
         self.deck_id = deck_id
         self.edited = edited
