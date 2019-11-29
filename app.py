@@ -28,15 +28,13 @@ class Users(db.Model):
     password_hash = db.Column(VARCHAR)
     pinata_api = db.Column(VARCHAR)
     pinata_key = db.Column(VARCHAR)
-    session_token = db.Column(JSONB)
 
-    def __init__(self, user_id, email, password_hash, pinata_api, pinata_key, session_token):
+    def __init__(self, user_id, email, password_hash, pinata_api, pinata_key):
         self.user_id = user_id
         self.email = email
         self.password_hash = password_hash
         self.pinata_api = pinata_api
         self.pinata_key = pinata_key
-        self.session_token = session_token
 
 class UserCollections(db.Model):
     deck_id = db.Column(VARCHAR, primary_key=True)
@@ -89,8 +87,8 @@ def sign_up():
     data = request.get_json()
     hashed_password = bcrypt.hashpw(data['password'], bcrypt.gensalt())
     new_user = Users(user_id=str(uuid.uuid4()), email=data['email'],
-                     password_hash=hashed_password, pinata_api=data['email'],
-                     pinata_key=data['pinata_key'], session_token=data['session_token'])
+                     password_hash=hashed_password, pinata_api=data['pinata_api'],
+                     pinata_key=data['pinata_key'])
     db.session.add(new_user)
     db.session.commit()
     return jsonify({'message' : 'New user created!'})
