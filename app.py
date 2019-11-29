@@ -88,8 +88,7 @@ def sign_up():
     data = request.get_json()
     hashed_password = bcrypt.hashpw(data['password'].encode('utf8'), bcrypt.gensalt())
     new_user = Users(user_id=str(uuid.uuid4()), email=data['email'],
-                                # .decode('utf8')
-                     password_hash=hashed_password, pinata_api=data['pinata_api'],
+                     password_hash=hashed_password.decode('utf8'), pinata_api=data['pinata_api'],
                      pinata_key=data['pinata_key'])
     db.session.add(new_user)
     db.session.commit()
@@ -105,8 +104,8 @@ def login():
 
     if not user:
         return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
-
-    if bcrypt.checkpw(auth.password.encode('utf8'), user.password_hash.encode('utf8')):
+                                        # .encode('utf8')
+    if bcrypt.checkpw(auth.password.encode('utf8'), user.password_hash):
         token = jwt.encode({'user_id': user.user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=15)},
                            app.config['SECRET_KEY'])
         return jsonify({'token': token.decode('UTF-8')})
