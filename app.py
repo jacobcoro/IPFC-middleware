@@ -15,7 +15,9 @@ app = Flask(__name__)
 app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SECRET_KEY'] = 'totally%@#$%^T@#Secure!'
-CORS(app)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# CORS(app)
 
 db = SQLAlchemy(app)
 
