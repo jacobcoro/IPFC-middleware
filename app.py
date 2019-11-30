@@ -11,15 +11,12 @@ import os
 import uwsgi
 from flask_cors import CORS, cross_origin
 
-
 app = Flask(__name__)
+CORS(app)
 app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SECRET_KEY'] = 'totally%@#$%^T@#Secure!'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-# CORS(app)
-
 db = SQLAlchemy(app)
 
 class Users(db.Model):
