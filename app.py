@@ -109,7 +109,7 @@ def sign_up():
 
     data = request.get_json()
     exists = Users.query.filter_by(email=data['email']).first()
-    if exists is None:
+    if exists is not None:
         return jsonify({"error": "email already exists"})
     else:
         hashed_password = bcrypt.hashpw(data['password'].encode('utf8'), bcrypt.gensalt())
