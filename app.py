@@ -35,14 +35,15 @@ class Users(db.Model):
         self.pinata_key = pinata_key
 
 class UserCollections(db.Model):
-    deck_id = db.Column(VARCHAR, primary_key=True)
+    user_id = db.Column(VARCHAR, primary_key=True)
     sr_id = db.Column(VARCHAR)
     deck_ids =  db.Column(JSONB)
     all_deck_cids = db.Column(JSONB)
-    def __init__(self, deck_id, sr_id, deck_ids, all_deck_cids):
-        self.deck_id = deck_id
+
+    def __init__(self, user_id, sr_id, deck_ids, all_deck_cids):
+        self.user_id = user_id
         self.sr_id = sr_id
-        self.deck_ids =  deck_ids
+        self.deck_ids = deck_ids
         self.all_deck_cids = all_deck_cids
 
 class Decks(db.Model):
@@ -51,6 +52,7 @@ class Decks(db.Model):
     deck_cid = db.Column(VARCHAR)
     deck = db.Column(JSONB)
     title = db.Column(VARCHAR)
+
     def __init__(self, deck_id, edited, deck_cid, deck, title):
         self.deck_id = deck_id
         self.edited = edited
@@ -72,7 +74,7 @@ def token_required(f):
 
         try:
             data = jwt.decode(token, app.config['SECRET_KEY'])
-            current_user = Users.query.filter_by(public_id=data['public_id']).first()
+            current_user = Users.query.filter_by(user_id=data['user_id']).first()
         except:
             return jsonify({'message' : 'Token is invalid!'}), 401
 
@@ -81,6 +83,7 @@ def token_required(f):
     return decorated
 
 @app.route('/sign_up', methods=['POST'])
+# @cross_origin(origin='*')
 def sign_up():
     data = request.get_json()
     hashed_password = bcrypt.hashpw(data['password'].encode('utf8'), bcrypt.gensalt())
@@ -101,7 +104,7 @@ def login():
 
     if not user:
         return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
-                                        #
+
     if bcrypt.checkpw(auth.password.encode('utf8'), user.password_hash.encode('utf8')):
         token = jwt.encode({'user_id': user.user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=15)},
                            app.config['SECRET_KEY'])
@@ -109,8 +112,18 @@ def login():
 
     return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
+@app.route('/get_user_collection', methods=['GET'])
+@token_required
+def get_user_collection(current_user):
 
+    user_collection = {}
 
+    user_collection['user_id'] = current_user.user_id
+    user_collection['sr_id'] = current_user.sr_id
+    user_collection['deck_ids'] = current_user.deck_ids
+    user_collection['all_decks_cids'] = current_user.all_decks_cids
+
+    return jsonify(user_collection)
 
 
 if __name__ == '__main__':
