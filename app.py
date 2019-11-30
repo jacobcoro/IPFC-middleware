@@ -124,7 +124,7 @@ def post_user_collection(current_user):
         all_deck_cids=data['all_deck_cids'],
     )
     db.session.add(new_collection)
-    db.sesson.commit()
+    db.session.commit()
     return jsonify({'message' : 'Collection added'})
 
 @app.route('/get_user_collection', methods=['GET'])
@@ -140,6 +140,20 @@ def get_user_collection(current_user):
 
     return jsonify(user_collection)
 
+@app.route('/put_user_collection', methods=['PUT'])
+@token_required
+def put_user_collection(current_user):
+    data = request.get_json()
+
+    new_collection = UserCollections(
+        user_id=current_user.user_id,
+        sr_id=data['sr_id'],
+        deck_ids=data['deck_ids'],
+        all_deck_cids=data['all_deck_cids'],
+    )
+    db.session.add(new_collection)
+    db.session.commit()
+    return jsonify({'message' : 'Collection added'})
 
 if __name__ == '__main__':
     app.run(debug=True)
