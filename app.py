@@ -108,10 +108,10 @@ def token_required(f):
 def sign_up():
 
     data = request.get_json()
-    try:
-        Users.query.filter_by(email=data['email']).first()
+    exists = Users.query.filter_by(email=data['email']).first()
+    if exists is None:
         return jsonify({"error": "email already exists"})
-    except:
+    else:
         hashed_password = bcrypt.hashpw(data['password'].encode('utf8'), bcrypt.gensalt())
         new_user = Users(user_id=str(uuid.uuid4()),
                          email=data['email'],
