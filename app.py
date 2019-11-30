@@ -205,7 +205,7 @@ def post_deck(current_user):
 def get_deck(current_user):
     data = request.get_json()
     deck_id = data['deck_id']
-    return deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first())
+    return deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first().deck)
 
 @app.route('/get_decks', methods=['GET'])
 @token_required
@@ -215,7 +215,7 @@ def get_decks(current_user):
     deck_ids = data['deck_ids']
     decks = []
     for deck_id in deck_ids:
-        decks.append(deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first())['deck'])
+        decks.append(deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first()).deck)
     return jsonify(decks)
 
 
@@ -224,13 +224,19 @@ def get_decks(current_user):
 def put_deck(current_user):
     # current_user ?
     data = request.get_json()
-    deck = Decks.query.filter_by(data['deck_id']).first()
+    deck_update = Decks.query.filter_by(data['deck_id']).first()
 
-    for key in data:
-        deck.key = data[key]
+    if 'deck' in data:
+        deck_update.deck = data['deck']
+    if 'title' in data:
+        deck_update.title = data['title']
+    if 'edited' in data:
+        deck_update.edited = data['edited']
+    if 'deck_cid' in data:
+        deck_update.deck_cid = data['deck_cid']
 
     db.session.commit()
-    return deck_schema.dump(deck)
+    return deck_schema.dump(deck_update)
 
 
 if __name__ == '__main__':
