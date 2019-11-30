@@ -154,14 +154,14 @@ def post_user_collection(current_user):
 @token_required
 def get_user_collection(current_user):
 
-    user_collection = UserCollections.query.filter_by(user_id=current_user.id).first()
+    user_collection = UserCollections.query.filter_by(user_id=current_user.user_id).first()
     return user_collection_schema.dump(user_collection)
 
 @app.route('/put_user_collection', methods=['PUT'])
 @token_required
 def put_user_collection(current_user):
     data = request.get_json()
-    user_collection = UserCollections.query.filter_by(user_id=current_user.id).first()
+    user_collection = UserCollections.query.filter_by(user_id=current_user.user_id).first()
     # if 'sr_id' in data:
         # sr_id=data['sr_id']
     # if 'deck_ids' in data:
