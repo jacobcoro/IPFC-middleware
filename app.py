@@ -12,8 +12,6 @@ import os
 import uwsgi
 from flask_cors import CORS, cross_origin
 
-
-
 app = Flask(__name__)
 ma = Marshmallow(app)
 CORS(app)
@@ -24,21 +22,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
-class UserCollectionsSchema(ma.Schema):
-    class Meta:
-        # Fields to expose
-        fields = ("user_id", "sr_id", "deck_ids", "all_deck_cids")
-
-
-user_collection_schema = UserCollectionsSchema()
-
-class DecksSchema(ma.Schema):
-    class Meta:
-        # Fields to expose
-        fields = ("deck_id", "edited", "deck_cid", "deck", "title")
-
-deck_schema = DecksSchema()
-decks_schema = DecksSchema(many=True)
+### Models ###
 
 class Users(db.Model):
     __table_args__ = {'schema':'admin'}
@@ -82,6 +66,27 @@ class Decks(db.Model):
         self.title = title
 
 
+### Schemas ###
+
+class UserCollectionsSchema(ma.Schema):
+    class Meta:
+        # Fields to expose
+        fields = ("user_id", "sr_id", "deck_ids", "all_deck_cids")
+
+
+user_collection_schema = UserCollectionsSchema()
+
+class DecksSchema(ma.Schema):
+    class Meta:
+        # Fields to expose
+        fields = ("deck_id", "edited", "deck_cid", "deck", "title")
+
+deck_schema = DecksSchema()
+decks_schema = DecksSchema(many=True)
+
+
+### JWT token checker ###
+
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -102,6 +107,9 @@ def token_required(f):
         return f(current_user, *args, **kwargs)
 
     return decorated
+
+
+### API call routes ###
 
 @app.route('/sign_up', methods=['POST'])
 # @cross_origin(origin='*')
@@ -179,7 +187,6 @@ def put_user_collection(current_user):
 
 @app.route('/post_deck', methods=['POST'])
 @token_required
-        # current_user
 def post_deck(current_user):
     data = request.get_json()
     exists = Decks.query.filter_by(deck_id=data['deck_id']).first()
@@ -201,7 +208,6 @@ def post_deck(current_user):
 
 @app.route('/get_deck', methods=['GET'])
 @token_required
-            # current_user ?
 def get_deck(current_user):
     data = request.get_json()
     deck_id = data['deck_id']
@@ -210,7 +216,6 @@ def get_deck(current_user):
 
 @app.route('/get_decks', methods=['GET'])
 @token_required
-            # current_user ?
 def get_decks(current_user):
     data = request.get_json()
     deck_ids = data['deck_ids']
@@ -218,14 +223,13 @@ def get_decks(current_user):
     for deck_id in deck_ids:
         dump = deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first())
         if dump is not None:
-            decks.append(dump['deck'])
+            decks.append(dump.deck)
     return jsonify(decks)
 
 
 @app.route('/put_deck', methods=['PUT'])
 @token_required
 def put_deck(current_user):
-    # current_user ?
     data = request.get_json()
     deck_update = Decks.query.filter_by(deck_id=data['deck_id']).first()
 
