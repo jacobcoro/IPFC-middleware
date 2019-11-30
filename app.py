@@ -182,7 +182,7 @@ def put_user_collection(current_user):
         # current_user
 def post_deck(current_user):
     data = request.get_json()
-    exists = Users.query.filter_by(deck_id=data['deck_id']).first()
+    exists = Decks.query.filter_by(deck_id=data['deck_id']).first()
     if exists is not None:
         return jsonify({"error": "deck already exists"})
     else:
