@@ -227,7 +227,7 @@ def get_decks(current_user):
 def put_deck(current_user):
     # current_user ?
     data = request.get_json()
-    deck_update = Decks.query.filter_by(data['deck_id']).first()
+    deck_update = Decks.query.filter_by(deck_id=data['deck_id']).first()
 
     if 'deck' in data:
         deck_update.deck = data['deck']
