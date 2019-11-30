@@ -205,7 +205,8 @@ def post_deck(current_user):
 def get_deck(current_user):
     data = request.get_json()
     deck_id = data['deck_id']
-    return deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first().deck)
+    dump = deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first())
+    return dump['deck']
 
 @app.route('/get_decks', methods=['GET'])
 @token_required
@@ -215,7 +216,7 @@ def get_decks(current_user):
     deck_ids = data['deck_ids']
     decks = []
     for deck_id in deck_ids:
-        decks.append(deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first()).deck)
+        decks.append(deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first()))
     return jsonify(decks)
 
 
