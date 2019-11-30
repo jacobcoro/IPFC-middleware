@@ -166,14 +166,12 @@ def get_user_collection(current_user):
 def put_user_collection(current_user):
     data = request.get_json()
     user_collection = UserCollections.query.filter_by(user_id=current_user.user_id).first()
-    # if 'sr_id' in data:
-        # sr_id=data['sr_id']
-    # if 'deck_ids' in data:
-        # deck_ids=data['deck_ids']
-    # if all_deck_cids in data:
-        # all_deck_cids=data['all_deck_cids']
-    for key in data:
-        user_collection.key = data[key]
+    if 'sr_id' in data:
+        user_collection.sr_id = data['sr_id']
+    if 'deck_ids' in data:
+        user_collection.deck_ids = data['deck_ids']
+    if 'all_deck_cids' in data:
+        user_collection.all_deck_cids = data['all_deck_cids']
 
     db.session.commit()
     return user_collection_schema.dump(user_collection)
