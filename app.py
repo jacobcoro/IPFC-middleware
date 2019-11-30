@@ -106,17 +106,21 @@ def token_required(f):
 @app.route('/sign_up', methods=['POST'])
 # @cross_origin(origin='*')
 def sign_up():
+
     data = request.get_json()
-    hashed_password = bcrypt.hashpw(data['password'].encode('utf8'), bcrypt.gensalt())
-    new_user = Users(user_id=str(uuid.uuid4()),
-                     email=data['email'],
-                     password_hash=hashed_password.decode('utf8'),
-                     # password_hash=hashed_password,
-                     pinata_api=data['pinata_api'],
-                     pinata_key=data['pinata_key'])
-    db.session.add(new_user)
-    db.session.commit()
-    return jsonify({'message': 'New user created!'})
+    try:
+        Users.query.filter_by(email=data['email']).first()
+        return jsonify({"error": "email already exists"})
+    except:
+        hashed_password = bcrypt.hashpw(data['password'].encode('utf8'), bcrypt.gensalt())
+        new_user = Users(user_id=str(uuid.uuid4()),
+                         email=data['email'],
+                         password_hash=hashed_password.decode('utf8'),
+                         pinata_api=data['pinata_api'],
+                         pinata_key=data['pinata_key'])
+        db.session.add(new_user)
+        db.session.commit()
+        return jsonify({'message': 'New user created!'})
 
 @app.route('/login')
 def login():
