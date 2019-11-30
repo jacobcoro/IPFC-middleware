@@ -241,7 +241,7 @@ def put_deck(current_user):
         deck_update.deck['title'] = data['title']
     if 'edited' in data:
         deck_update.edited = data['edited']
-        deck_update.deck['edited'] = data['edited']
+        deck_update.deck['deck']['edited'] = data['edited']
     if 'deck_cid' in data:
         deck_update.deck_cid = data['deck_cid']
 
