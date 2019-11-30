@@ -140,7 +140,7 @@ def post_user_collection(current_user):
 
     new_collection = UserCollections(
         user_id=current_user.user_id,
-        sr_id=data['sr_id'], # uuid4
+        sr_id=str(uuid.uuid4()),
         deck_ids=data['deck_ids'],
         all_deck_cids=data['all_deck_cids'],
     )
