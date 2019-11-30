@@ -113,7 +113,7 @@ def sign_up():
                      pinata_key=data['pinata_key'])
     db.session.add(new_user)
     db.session.commit()
-    return jsonify({'message': 'New user created!', 'User data': new_user})
+    return jsonify({'message': 'New user created!')
 
 @app.route('/login')
 def login():
