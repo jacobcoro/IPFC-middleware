@@ -4,6 +4,7 @@ Flask==1.1.1
 psycopg2_binary==2.8.3
 Flask_SQLAlchemy==2.4.1
 flask_marshmallow==0.10.1
+marshmallow-sqlalchemy==0.19.0
 bcrypt==3.1.7
 PyJWT==1.7.1
 psycopg2==2.8.4
