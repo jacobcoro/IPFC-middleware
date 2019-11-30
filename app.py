@@ -108,8 +108,11 @@ def token_required(f):
 def sign_up():
     data = request.get_json()
     hashed_password = bcrypt.hashpw(data['password'].encode('utf8'), bcrypt.gensalt())
-    new_user = Users(user_id=str(uuid.uuid4()), email=data['email'],
-                     password_hash=hashed_password.decode('utf8'), pinata_api=data['pinata_api'],
+    new_user = Users(user_id=str(uuid.uuid4()),
+                     email=data['email'],
+                     # password_hash=hashed_password.decode('utf8'),
+                     password_hash=hashed_password,
+                     pinata_api=data['pinata_api'],
                      pinata_key=data['pinata_key'])
     db.session.add(new_user)
     db.session.commit()
@@ -125,8 +128,8 @@ def login():
 
     if not user:
         return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
-
-    if bcrypt.checkpw(auth.password.encode('utf8'), user.password_hash):
+    # if bcrypt.checkpw(auth.password.encode('utf8'), user.password_hash):
+    if bcrypt.checkpw(auth.password.encode('utf8'), user.password_hash.encode('utf8')):
         token = jwt.encode({'user_id': user.user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=15)},
                            app.config['SECRET_KEY'])
         return jsonify({'token': token.decode('UTF-8')})
@@ -138,12 +141,10 @@ def login():
 def post_user_collection(current_user):
     data = request.get_json()
 
-    new_collection = UserCollections(
-        user_id=current_user.user_id,
-        sr_id=str(uuid.uuid4()),
-        deck_ids=data['deck_ids'],
-        all_deck_cids=data['all_deck_cids'],
-    )
+    new_collection = UserCollections(user_id=current_user.user_id,
+                                     sr_id=str(uuid.uuid4()),
+                                     all_deck_cids=data['all_deck_cids'],
+                                     deck_ids=data['deck_ids'],)
     db.session.add(new_collection)
     db.session.commit()
 
