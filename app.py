@@ -92,7 +92,7 @@ def sign_up():
                      pinata_key=data['pinata_key'])
     db.session.add(new_user)
     db.session.commit()
-    return jsonify({'message' : 'New user created!'})
+    return jsonify({'message': 'New user created!', 'User data': new_user})
 
 @app.route('/login')
 def login():
@@ -110,7 +110,7 @@ def login():
                            app.config['SECRET_KEY'])
         return jsonify({'token': token.decode('UTF-8')})
 
-    return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+    return make_response('Could not verify', 401, {'WWW-Authenticate': 'Basic realm="Login required!"'})
 
 @app.route('/post_user_collection', methods=['POST'])
 @token_required
@@ -125,7 +125,7 @@ def post_user_collection(current_user):
     )
     db.session.add(new_collection)
     db.session.commit()
-    return jsonify({'message' : 'Collection added'})
+    return jsonify({'message': 'Collection added', "collection data": new_collection})
 
 @app.route('/get_user_collection', methods=['GET'])
 @token_required
@@ -153,7 +153,34 @@ def put_user_collection(current_user):
     )
     db.session.add(new_collection)
     db.session.commit()
-    return jsonify({'message' : 'Collection added'})
+    return jsonify({'message': 'Collection updated', "collection data": new_collection})
+
+
+@app.route('/post_deck', methods=['POST'])
+@token_required
+        # current_user
+def post_deck():
+    data = request.get_json()
+
+    new_deck = Decks(
+        deck_id=data['deck_id'],
+        title=data['title'],
+        edited=data['edited'],
+        deck_cid=data['deck_cid'],
+        deck=data['deck']
+    )
+    db.session.add(new_deck)
+    db.session.commit()
+    return jsonify({'message': 'Deck added', "deck data": new_deck})
+
+
+@app.route('/get_deck', methods=['GET'])
+@token_required
+            # current_user
+def get_deck(deck_id):
+
+    return jsonify(Decks.query.filter_by(deck_id=deck_id))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
