@@ -241,10 +241,12 @@ def put_deck(current_user):
         deck_update.deck['title'] = data['title']
     if 'edited' in data:
         deck_update.edited = data['edited']
+        # might be redundant
+        # Make sure to never overwrite the deck. If the deck is changed serverside remember to change edited
         if 'deck' not in data:
-            deck = deck_update.deck
-            deck['edited'] = data['edited']
-            deck_update.deck = deck
+            dump = deck_schema.dump(Decks.query.filter_by(deck_id=data['deck_id']).first())
+            dump['edited'] = data['edited']
+            deck_update.deck = dump
     if 'deck_cid' in data:
         deck_update.deck_cid = data['deck_cid']
 
