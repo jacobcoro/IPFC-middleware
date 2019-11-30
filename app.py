@@ -140,16 +140,15 @@ def login():
 @token_required
 def post_user_collection(current_user):
     data = request.get_json()
-    #
-    # new_collection = UserCollections(user_id=current_user.user_id,
-    #                                  sr_id=str(uuid.uuid4()),
-    #                                  all_deck_cids=data['all_deck_cids'],
-    #                                  deck_ids=data['deck_ids'],)
-    # db.session.add(new_collection)
-    # db.session.commit()
 
-    # return user_collection_schema.dump(new_collection)
-    return jsonify(data)
+    new_collection = UserCollections(user_id=current_user.user_id,
+                                     sr_id=str(uuid.uuid4()),
+                                     all_deck_cids=data['all_deck_cids'],
+                                     deck_ids=data['deck_ids'],)
+    db.session.add(new_collection)
+    db.session.commit()
+
+    return user_collection_schema.dump(new_collection)
 
 @app.route('/get_user_collection', methods=['GET'])
 @token_required
