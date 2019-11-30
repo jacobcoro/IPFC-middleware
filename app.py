@@ -217,7 +217,8 @@ def get_decks(current_user):
     decks = []
     for deck_id in deck_ids:
         dump = decks.append(deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first()))
-        decks.append(dump['deck'])
+        if dump is not None:
+            decks.append(dump['deck'])
     return jsonify(decks)
 
 
