@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import BIGINT, JSONB, VARCHAR
+from flask_marshmallow import Marshmallow
 import psycopg2
 import uuid
 import bcrypt
@@ -12,13 +13,32 @@ import uwsgi
 from flask_cors import CORS, cross_origin
 
 
+
 app = Flask(__name__)
+ma = Marshmallow(app)
 CORS(app)
 app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SECRET_KEY'] = 'totally%@#$%^T@#Secure!'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+
+class UserCollectionsSchema(ma.Schema):
+    class Meta:
+        # Fields to expose
+        fields = ("user_id", "sr_id", "deck_ids", "all_deck_cids")
+
+
+user_collection_schema = UserCollectionsSchema()
+
+class DecksSchema(ma.Schema):
+    class Meta:
+        # Fields to expose
+        fields = ("deck_id", "edited", "deck_cid", "deck", "title")
+
+deck_schema = DecksSchema()
+decks_schema = DecksSchema(many=True)
 
 class Users(db.Model):
     __table_args__ = {'schema':'admin'}
@@ -126,20 +146,15 @@ def post_user_collection(current_user):
     )
     db.session.add(new_collection)
     db.session.commit()
-    return jsonify({'message': 'Collection added', "collection data": new_collection})
+
+    return user_collection_schema.dump(new_collection)
 
 @app.route('/get_user_collection', methods=['GET'])
 @token_required
 def get_user_collection(current_user):
 
-    user_collection = {}
-
-    user_collection['user_id'] = current_user.user_id
-    user_collection['sr_id'] = current_user.sr_id
-    user_collection['deck_ids'] = current_user.deck_ids
-    user_collection['all_decks_cids'] = current_user.all_decks_cids
-
-    return jsonify(user_collection)
+    user_collection = UserCollections.query.filter_by(user_id=current_user.id).first()
+    return user_collection_schema.dump(user_collection)
 
 @app.route('/put_user_collection', methods=['PUT'])
 @token_required
@@ -156,13 +171,13 @@ def put_user_collection(current_user):
         user_collection.key = data[key]
 
     db.session.commit()
-    return jsonify({'message': 'Collection updated', "collection data": user_collection})
+    return user_collection_schema.dump(user_collection)
 
 
 @app.route('/post_deck', methods=['POST'])
 @token_required
         # current_user
-def post_deck():
+def post_deck(current_user):
     data = request.get_json()
 
     new_deck = Decks(
@@ -174,29 +189,41 @@ def post_deck():
     )
     db.session.add(new_deck)
     db.session.commit()
-    return jsonify({'message': 'Deck added', "deck data": new_deck})
+    return deck_schema.dump(new_deck)
 
 
 @app.route('/get_deck', methods=['GET'])
 @token_required
-            # current_user
-def get_deck(deck_id):
+            # current_user ?
+def get_deck(current_user):
+    data = request.get_json()
+    deck_id = data['deck_id']
+    return deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first())
 
-    return jsonify(Decks.query.filter_by(deck_id=deck_id))
+@app.route('/get_decks', methods=['GET'])
+@token_required
+            # current_user ?
+def get_decks(current_user):
+    data = request.get_json()
+    deck_ids = data['deck_ids']
+    decks = []
+    for deck_id in deck_ids:
+        decks.append(deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first()))
+    return jsonify(decks)
 
 
 @app.route('/put_deck', methods=['PUT'])
 @token_required
-def put_deck():
+def put_deck(current_user):
     # current_user ?
     data = request.get_json()
-    deck = Decks.query.filter_by(data['deck_id'])
+    deck = Decks.query.filter_by(data['deck_id']).first()
 
     for key in data:
         deck.key = data[key]
 
     db.session.commit()
-    return jsonify({'message': 'Deck added', "deck data": deck})
+    return deck_schema.dump(deck)
 
 
 if __name__ == '__main__':
