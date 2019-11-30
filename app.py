@@ -238,7 +238,10 @@ def put_deck(current_user):
     if 'title' in data:
         deck_update.title = data['title']
         # might be redundant
-        deck_update.deck['title'] = data['title']
+        if 'deck' not in data:
+            dump = deck_schema.dump(Decks.query.filter_by(deck_id=data['deck_id']).first())
+            dump['title'] = data['title']
+            deck_update.deck = dump
     if 'edited' in data:
         deck_update.edited = data['edited']
         # might be redundant
