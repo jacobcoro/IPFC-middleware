@@ -11,6 +11,7 @@ import os
 import uwsgi
 from flask_cors import CORS, cross_origin
 
+
 app = Flask(__name__)
 CORS(app)
 app.debug = True
@@ -119,7 +120,7 @@ def post_user_collection(current_user):
 
     new_collection = UserCollections(
         user_id=current_user.user_id,
-        sr_id=data['sr_id'],
+        sr_id=data['sr_id'], # uuid4
         deck_ids=data['deck_ids'],
         all_deck_cids=data['all_deck_cids'],
     )
@@ -144,16 +145,18 @@ def get_user_collection(current_user):
 @token_required
 def put_user_collection(current_user):
     data = request.get_json()
+    user_collection = UserCollections.query.filter_by(user_id=current_user.id).first()
+    # if 'sr_id' in data:
+        # sr_id=data['sr_id']
+    # if 'deck_ids' in data:
+        # deck_ids=data['deck_ids']
+    # if all_deck_cids in data:
+        # all_deck_cids=data['all_deck_cids']
+    for key in data:
+        user_collection.key = data[key]
 
-    new_collection = UserCollections(
-        user_id=current_user.user_id,
-        sr_id=data['sr_id'],
-        deck_ids=data['deck_ids'],
-        all_deck_cids=data['all_deck_cids'],
-    )
-    db.session.add(new_collection)
     db.session.commit()
-    return jsonify({'message': 'Collection updated', "collection data": new_collection})
+    return jsonify({'message': 'Collection updated', "collection data": user_collection})
 
 
 @app.route('/post_deck', methods=['POST'])
@@ -180,6 +183,20 @@ def post_deck():
 def get_deck(deck_id):
 
     return jsonify(Decks.query.filter_by(deck_id=deck_id))
+
+
+@app.route('/put_deck', methods=['PUT'])
+@token_required
+def put_deck():
+    # current_user ?
+    data = request.get_json()
+    deck = Decks.query.filter_by(data['deck_id'])
+
+    for key in data:
+        deck.key = data[key]
+
+    db.session.commit()
+    return jsonify({'message': 'Deck added', "deck data": deck})
 
 
 if __name__ == '__main__':
