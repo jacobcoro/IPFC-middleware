@@ -134,7 +134,7 @@ def login():
         return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
     # if bcrypt.checkpw(auth.password.encode('utf8'), user.password_hash):
     if bcrypt.checkpw(auth.password.encode('utf8'), user.password_hash.encode('utf8')):
-        token = jwt.encode({'user_id': user.user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=15)},
+        token = jwt.encode({'user_id': user.user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)},
                            app.config['SECRET_KEY'])
         return jsonify({'token': token.decode('UTF-8')})
 
@@ -182,17 +182,21 @@ def put_user_collection(current_user):
         # current_user
 def post_deck(current_user):
     data = request.get_json()
-
-    new_deck = Decks(
-        deck_id=data['deck_id'],
-        title=data['title'],
-        edited=data['edited'],
-        deck_cid=data['deck_cid'],
-        deck=data['deck']
-    )
-    db.session.add(new_deck)
-    db.session.commit()
-    return deck_schema.dump(new_deck)
+    exists = Users.query.filter_by(deck_id=data['deck_id']).first()
+    if exists is not None:
+        return jsonify({"error": "deck already exists"})
+    else:
+        new_deck = Decks(
+            deck_id=data['deck_id'],
+            deck=data['deck'],
+            # consider getting rid of these and just use values stored in deck
+            title=data['title'],
+            edited=data['edited'],
+            deck_cid=data['deck_cid']
+        )
+        db.session.add(new_deck)
+        db.session.commit()
+        return deck_schema.dump(new_deck)
 
 
 @app.route('/get_deck', methods=['GET'])
@@ -211,7 +215,7 @@ def get_decks(current_user):
     deck_ids = data['deck_ids']
     decks = []
     for deck_id in deck_ids:
-        decks.append(deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first()))
+        decks.append(deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first())['deck'])
     return jsonify(decks)
 
 
