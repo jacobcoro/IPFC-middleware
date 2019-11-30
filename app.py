@@ -37,7 +37,7 @@ class Users(db.Model):
 class UserCollections(db.Model):
     user_id = db.Column(VARCHAR, primary_key=True)
     sr_id = db.Column(VARCHAR)
-    deck_ids =  db.Column(JSONB)
+    deck_ids = db.Column(JSONB)
     all_deck_cids = db.Column(JSONB)
 
     def __init__(self, user_id, sr_id, deck_ids, all_deck_cids):
@@ -111,6 +111,21 @@ def login():
         return jsonify({'token': token.decode('UTF-8')})
 
     return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+
+@app.route('/post_user_collection', methods=['POST'])
+@token_required
+def post_user_collection(current_user):
+    data = request.get_json()
+
+    new_collection = UserCollections(
+        user_id=current_user.user_id,
+        sr_id=data['sr_id'],
+        deck_ids=data['deck_ids'],
+        all_deck_cids=data['all_deck_cids'],
+    )
+    db.session.add(new_collection)
+    db.sesson.commit()
+    return jsonify({'message' : 'Collection added'})
 
 @app.route('/get_user_collection', methods=['GET'])
 @token_required
