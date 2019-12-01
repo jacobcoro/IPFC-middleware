@@ -2,15 +2,19 @@ from flask import Flask, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import BIGINT, JSONB, VARCHAR
 from flask_marshmallow import Marshmallow
-import psycopg2
 import uuid
 import bcrypt
 import jwt
 import datetime
 from functools import wraps
 import os
-import uwsgi
 from flask_cors import CORS, cross_origin
+# remember to include uswgi, psycopg2, marshmallow-sqlalchemy in reqs.txt, also bcrypt==3.1.7 which pipreqs gets wrong:
+# psycopg2_binary==2.8.3
+# marshmallow-sqlalchemy==0.19.0
+# bcrypt==3.1.7
+# psycopg2==2.8.4
+# uwsgi==2.0.18
 
 app = Flask(__name__)
 ma = Marshmallow(app)
