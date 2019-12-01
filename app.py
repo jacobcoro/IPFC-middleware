@@ -70,7 +70,6 @@ class Decks(db.Model):
 
 class UserCollectionsSchema(ma.Schema):
     class Meta:
-        # Fields to expose
         fields = ("user_id", "sr_id", "deck_ids", "all_deck_cids")
 
 
@@ -78,7 +77,6 @@ user_collection_schema = UserCollectionsSchema()
 
 class DecksSchema(ma.Schema):
     class Meta:
-        # Fields to expose
         fields = ("deck_id", "edited", "deck_cid", "deck", "title")
 
 deck_schema = DecksSchema()
@@ -140,7 +138,6 @@ def login():
 
     if not user:
         return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
-    # if bcrypt.checkpw(auth.password.encode('utf8'), user.password_hash):
     if bcrypt.checkpw(auth.password.encode('utf8'), user.password_hash.encode('utf8')):
         token = jwt.encode({'user_id': user.user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)},
                            app.config['SECRET_KEY'])
@@ -196,7 +193,7 @@ def post_deck(current_user):
         new_deck = Decks(
             deck_id=data['deck_id'],
             deck=data['deck'],
-            # consider getting rid of these and just use values stored in deck
+            # these echo 'deck' internal info to allow for less expensive database metadata queries
             title=data['title'],
             edited=data['edited'],
             deck_cid=data['deck_cid']
@@ -235,29 +232,47 @@ def put_deck(current_user):
 
     if 'deck' in data:
         deck_update.deck = data['deck']
+    # If the deck is changed server-side remember to change edited and title in deck itself !!!
     if 'title' in data:
         deck_update.title = data['title']
-        # might be redundant
-        if 'deck' not in data:
-            dump = deck_schema.dump(Decks.query.filter_by(deck_id=data['deck_id']).first())
-            dump['title'] = data['title']
-            deck_update.deck['deck'] = dump
-
-    # They'll write over each other without a commit?
     if 'edited' in data:
         deck_update.edited = data['edited']
-        # might be redundant
-        # Make sure to never overwrite the deck. If the deck is changed serverside remember to change edited
-        if 'deck' not in data:
-            dump = deck_schema.dump(Decks.query.filter_by(deck_id=data['deck_id']).first())
-            dump['edited'] = data['edited']
-            deck_update.deck['deck'] = dump
     if 'deck_cid' in data:
         deck_update.deck_cid = data['deck_cid']
 
     db.session.commit()
     return deck_schema.dump(deck_update)
 
+@app.route('/get_deck_meta', methods=['GET'])
+@token_required
+def get_deck_meta(current_user):
+    data = request.get_json()
+    deck_id = data['deck_id']
+    dump = deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first())
+    deck_meta = {
+    'title' : dump['title'],
+    'edited' : dump['edited'],
+    'deck_cid' : dump['deck_cid'],
+    'deck_id' : dump['deck_id']
+    }
+    return jsonify(deck_meta)
+
+@app.route('/get_decks_meta', methods=['GET'])
+@token_required
+def get_decks_meta(current_user):
+    data = request.get_json()
+    deck_ids = data['deck_ids']
+    decks_meta = []
+    for deck_id in deck_ids:
+        dump = deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first())
+        deck_meta = {
+        'title' : dump['title'],
+        'edited' : dump['edited'],
+        'deck_cid' : dump['deck_cid'],
+        'deck_id' : dump['deck_id']
+        }
+        decks_meta.append(deck_meta)
+    return jsonify(decks_meta)
 
 if __name__ == '__main__':
     app.run(debug=True)
