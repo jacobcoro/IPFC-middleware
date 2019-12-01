@@ -117,7 +117,7 @@ def token_required(f):
 ### API call routes ###
 
 @app.route('/sign_up', methods=['POST'])
-# @cross_origin(origin='*')
+@cross_origin(origin='*')
 def sign_up():
 
     data = request.get_json()
@@ -137,6 +137,7 @@ def sign_up():
 
 
 @app.route('/login')
+@cross_origin(origin='*')
 def login():
     auth = request.authorization
 
