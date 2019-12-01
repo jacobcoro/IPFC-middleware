@@ -29,7 +29,7 @@ db = SQLAlchemy(app)
 ### Models ###
 
 class Users(db.Model):
-    __table_args__ = {'schema':'admin'}
+    __table_args__ = {'schema': 'admin'}
     user_id = db.Column(VARCHAR, primary_key=True)
     email = db.Column(VARCHAR)
     password_hash = db.Column(VARCHAR)
@@ -254,6 +254,19 @@ def put_deck(current_user):
     db.session.commit()
     return deck_schema.dump(deck_update)
 
+@app.route('/delete_deck', methods=['DELETE'])
+@token_required
+def delete_deck(current_user):
+    data = request.get_json()
+    deck = Decks.query.filter_by(deck_id=data['deck_id']).first()
+
+    if not deck:
+        return jsonify({'message': 'No deck found!'})
+
+    db.session.delete(deck)
+    db.session.commit()
+
+    return jsonify({'message': 'Deck deleted!'})
 
 @app.route('/get_deck_meta', methods=['GET'])
 @token_required
