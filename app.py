@@ -156,6 +156,7 @@ def login():
 
 
 @app.route('/post_user_collection', methods=['POST'])
+@cross_origin(origin='*')
 @token_required
 def post_user_collection(current_user):
     data = request.get_json()
@@ -171,6 +172,7 @@ def post_user_collection(current_user):
 
 
 @app.route('/get_user_collection', methods=['GET'])
+@cross_origin(origin='*')
 @token_required
 def get_user_collection(current_user):
 
@@ -179,6 +181,7 @@ def get_user_collection(current_user):
 
 
 @app.route('/put_user_collection', methods=['PUT'])
+@cross_origin(origin='*')
 @token_required
 def put_user_collection(current_user):
     data = request.get_json()
@@ -195,6 +198,7 @@ def put_user_collection(current_user):
 
 
 @app.route('/post_deck', methods=['POST'])
+@cross_origin(origin='*')
 @token_required
 def post_deck(current_user):
     data = request.get_json()
@@ -216,6 +220,7 @@ def post_deck(current_user):
 
 
 @app.route('/get_deck', methods=['GET'])
+@cross_origin(origin='*')
 @token_required
 def get_deck(current_user):
     data = request.get_json()
@@ -225,6 +230,7 @@ def get_deck(current_user):
 
 
 @app.route('/get_decks', methods=['GET'])
+@cross_origin(origin='*')
 @token_required
 def get_decks(current_user):
     data = request.get_json()
@@ -238,6 +244,7 @@ def get_decks(current_user):
 
 
 @app.route('/put_deck', methods=['PUT'])
+@cross_origin(origin='*')
 @token_required
 def put_deck(current_user):
     data = request.get_json()
@@ -257,6 +264,7 @@ def put_deck(current_user):
     return deck_schema.dump(deck_update)
 
 @app.route('/delete_deck', methods=['DELETE'])
+@cross_origin(origin='*')
 @token_required
 def delete_deck(current_user):
     data = request.get_json()
@@ -271,6 +279,7 @@ def delete_deck(current_user):
     return jsonify({'message': 'Deck deleted!'})
 
 @app.route('/get_deck_meta', methods=['GET'])
+@cross_origin(origin='*')
 @token_required
 def get_deck_meta(current_user):
     data = request.get_json()
@@ -286,6 +295,7 @@ def get_deck_meta(current_user):
 
 
 @app.route('/get_decks_meta', methods=['GET'])
+@cross_origin(origin='*')
 @token_required
 def get_decks_meta(current_user):
     data = request.get_json()
