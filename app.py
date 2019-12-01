@@ -63,6 +63,7 @@ class Decks(db.Model):
     deck_cid = db.Column(VARCHAR)
     deck = db.Column(JSONB)
     title = db.Column(VARCHAR)
+    # created by?
 
     def __init__(self, deck_id, edited, deck_cid, deck, title):
         self.deck_id = deck_id
@@ -100,13 +101,13 @@ def token_required(f):
             token = request.headers['x-access-token']
 
         if not token:
-            return jsonify({'message' : 'Token is missing!'}), 401
+            return jsonify({'message': 'Token is missing!'}), 401
 
         try:
             data = jwt.decode(token, app.config['SECRET_KEY'])
             current_user = Users.query.filter_by(user_id=data['user_id']).first()
         except:
-            return jsonify({'message' : 'Token is invalid!'}), 401
+            return jsonify({'message': 'Token is invalid!'}), 401
 
         return f(current_user, *args, **kwargs)
 
