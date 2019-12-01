@@ -258,11 +258,11 @@ def get_deck_meta(current_user):
     deck_id = data['deck_id']
     dump = deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first())
     deck_meta = {
-    'title' : dump['title'],
-    'edited' : dump['edited'],
-    'deck_cid' : dump['deck_cid'],
-    'deck_id' : dump['deck_id']
-    }
+                'title': dump['title'],
+                'edited': dump['edited'],
+                'deck_cid': dump['deck_cid'],
+                'deck_id': dump['deck_id']
+                }
     return jsonify(deck_meta)
 
 
@@ -275,11 +275,11 @@ def get_decks_meta(current_user):
     for deck_id in deck_ids:
         dump = deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first())
         deck_meta = {
-        'title' : dump['title'],
-        'edited' : dump['edited'],
-        'deck_cid' : dump['deck_cid'],
-        'deck_id' : dump['deck_id']
-        }
+                    'title': dump['title'],
+                    'edited': dump['edited'],
+                    'deck_cid': dump['deck_cid'],
+                    'deck_id': dump['deck_id']
+                    }
         decks_meta.append(deck_meta)
     return jsonify(decks_meta)
 
