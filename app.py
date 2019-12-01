@@ -39,6 +39,7 @@ class Users(db.Model):
         self.pinata_api = pinata_api
         self.pinata_key = pinata_key
 
+
 class UserCollections(db.Model):
     user_id = db.Column(VARCHAR, primary_key=True)
     sr_id = db.Column(VARCHAR)
@@ -50,6 +51,7 @@ class UserCollections(db.Model):
         self.sr_id = sr_id
         self.deck_ids = deck_ids
         self.all_deck_cids = all_deck_cids
+
 
 class Decks(db.Model):
     deck_id = db.Column(VARCHAR, primary_key=True)
@@ -73,12 +75,12 @@ class UserCollectionsSchema(ma.Schema):
         fields = ("user_id", "sr_id", "deck_ids", "all_deck_cids")
 
 
-user_collection_schema = UserCollectionsSchema()
-
 class DecksSchema(ma.Schema):
     class Meta:
         fields = ("deck_id", "edited", "deck_cid", "deck", "title")
 
+
+user_collection_schema = UserCollectionsSchema()
 deck_schema = DecksSchema()
 decks_schema = DecksSchema(many=True)
 
@@ -128,6 +130,7 @@ def sign_up():
         db.session.commit()
         return jsonify({'message': 'New user created!'})
 
+
 @app.route('/login')
 def login():
     auth = request.authorization
@@ -145,6 +148,7 @@ def login():
 
     return make_response('Could not verify', 401, {'WWW-Authenticate': 'Basic realm="Login required!"'})
 
+
 @app.route('/post_user_collection', methods=['POST'])
 @token_required
 def post_user_collection(current_user):
@@ -159,12 +163,14 @@ def post_user_collection(current_user):
 
     return user_collection_schema.dump(new_collection)
 
+
 @app.route('/get_user_collection', methods=['GET'])
 @token_required
 def get_user_collection(current_user):
 
     user_collection = UserCollections.query.filter_by(user_id=current_user.user_id).first()
     return user_collection_schema.dump(user_collection)
+
 
 @app.route('/put_user_collection', methods=['PUT'])
 @token_required
@@ -211,6 +217,7 @@ def get_deck(current_user):
     dump = deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first())
     return dump['deck']
 
+
 @app.route('/get_decks', methods=['GET'])
 @token_required
 def get_decks(current_user):
@@ -243,6 +250,7 @@ def put_deck(current_user):
     db.session.commit()
     return deck_schema.dump(deck_update)
 
+
 @app.route('/get_deck_meta', methods=['GET'])
 @token_required
 def get_deck_meta(current_user):
@@ -256,6 +264,7 @@ def get_deck_meta(current_user):
     'deck_id' : dump['deck_id']
     }
     return jsonify(deck_meta)
+
 
 @app.route('/get_decks_meta', methods=['GET'])
 @token_required
@@ -273,6 +282,7 @@ def get_decks_meta(current_user):
         }
         decks_meta.append(deck_meta)
     return jsonify(decks_meta)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
