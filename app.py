@@ -126,13 +126,21 @@ def sign_up():
         return jsonify({"error": "email already exists"})
     else:
         hashed_password = bcrypt.hashpw(data['password'].encode('utf8'), bcrypt.gensalt())
-        new_user = Users(user_id=str(uuid.uuid4()),
+        user_id = str(uuid.uuid4())
+        new_user = Users(user_id=user_id,
                          email=data['email'],
                          password_hash=hashed_password.decode('utf8'),
                          pinata_api=data['pinata_api'],
                          pinata_key=data['pinata_key'])
         db.session.add(new_user)
         db.session.commit()
+        new_collection = UserCollections(user_id=user_id,
+                                         sr_id=str(uuid.uuid4()),
+                                         all_deck_cids=[],
+                                         deck_ids=[],)
+        db.session.add(new_collection)
+        db.session.commit()
+
         return jsonify({'message': 'New user created!'})
 
 
@@ -155,6 +163,7 @@ def login():
     return make_response('Could not verify', 401, {'WWW-Authenticate': 'Basic realm="Login required!"'})
 
 
+# added this create user collection to sign up. leaving this just in case
 @app.route('/post_user_collection', methods=['POST'])
 @cross_origin(origin='*')
 @token_required
@@ -164,7 +173,7 @@ def post_user_collection(current_user):
     new_collection = UserCollections(user_id=current_user.user_id,
                                      sr_id=str(uuid.uuid4()),
                                      all_deck_cids=data['all_deck_cids'],
-                                     deck_ids=data['deck_ids'],)
+                                     deck_ids=data['deck_ids'])
     db.session.add(new_collection)
     db.session.commit()
 
