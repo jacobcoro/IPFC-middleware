@@ -163,7 +163,7 @@ def login():
         user_collection = UserCollections.query.filter_by(user_id=user.user_id).first()
 
         # Get decks metadata
-        deck_ids = user_collection['deck_ids']
+        deck_ids = user_collection.deck_ids
         decks_meta = []
         for deck_id in deck_ids:
             dump = deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first())
