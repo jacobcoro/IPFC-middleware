@@ -161,8 +161,25 @@ def login():
                            app.config['SECRET_KEY'])
         # Get user collection
         user_collection = UserCollections.query.filter_by(user_id=user.user_id).first()
+
+        # Get decks metadata
+        deck_ids = user_collection['deck_ids']
+        decks_meta = []
+        for deck_id in deck_ids:
+            dump = deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first())
+            deck_meta = {
+                'title': dump['title'],
+                'edited': dump['edited'],
+                'deck_cid': dump['deck_cid'],
+                'deck_id': dump['deck_id']
+            }
+            decks_meta.append(deck_meta)
+
+        # Preload up to 10 decks here? just get them all, up to 100? do speed tests to decide
+
         login_return_data = {'user_collection': user_collection_schema.dump(user_collection),
-                             'token': token.decode('UTF-8')}
+                             'token': token.decode('UTF-8'),
+                             'decks_meta': decks_meta}
 
         return jsonify(login_return_data)
 
