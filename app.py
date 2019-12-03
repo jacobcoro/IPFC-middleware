@@ -133,14 +133,13 @@ def sign_up():
                          pinata_api=data['pinata_api'],
                          pinata_key=data['pinata_key'])
         db.session.add(new_user)
-        db.session.commit()
+
         new_collection = UserCollections(user_id=user_id,
                                          sr_id=str(uuid.uuid4()),
                                          all_deck_cids=[],
                                          deck_ids=[],)
         db.session.add(new_collection)
         db.session.commit()
-
         return jsonify({'message': 'New user created!'})
 
 
