@@ -151,14 +151,21 @@ def login():
 
     if not auth or not auth.username or not auth.password:
         return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
-    user = Users.query.filter_by(email=auth.username).first()
 
+    user = Users.query.filter_by(email=auth.username).first()
     if not user:
         return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+
+    # verified path
     if bcrypt.checkpw(auth.password.encode('utf8'), user.password_hash.encode('utf8')):
         token = jwt.encode({'user_id': user.user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)},
                            app.config['SECRET_KEY'])
-        return jsonify({'token': token.decode('UTF-8')})
+        # Get user collection
+        user_collection = UserCollections.query.filter_by(user_id=user.user_id).first()
+        login_return_data = {'user_collection': user_collection_schema.dump(user_collection),
+                             'token': token.decode('UTF-8')}
+
+        return jsonify(login_return_data)
 
     return make_response('Could not verify', 401, {'WWW-Authenticate': 'Basic realm="Login required!"'})
 
