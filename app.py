@@ -149,11 +149,11 @@ def login():
     auth = request.authorization
 
     if not auth or not auth.username or not auth.password:
-        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+        return jsonify({"error": "invalid credentials"})
 
     user = Users.query.filter_by(email=auth.username).first()
     if not user:
-        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+        return jsonify({"error": "invalid credentials"})
 
     # verified path
     if bcrypt.checkpw(auth.password.encode('utf8'), user.password_hash.encode('utf8')):
@@ -166,7 +166,7 @@ def login():
 
         return jsonify(login_return_data)
 
-    return make_response('Could not verify', 401, {'WWW-Authenticate': 'Basic realm="Login required!"'})
+    return jsonify({"error": "invalid credentials"})
 
 
 # added this create user collection to sign up. leaving this just in case
