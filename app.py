@@ -123,7 +123,7 @@ def sign_up():
     data = request.get_json()
     exists = Users.query.filter_by(email=data['email']).first()
     if exists is not None:
-        return jsonify({"error": "email already exists"})
+        return jsonify({"error": "Email already exists"})
     else:
         hashed_password = bcrypt.hashpw(data['password'].encode('utf8'), bcrypt.gensalt())
         user_id = str(uuid.uuid4())
@@ -149,11 +149,11 @@ def login():
     auth = request.authorization
 
     if not auth or not auth.username or not auth.password:
-        return jsonify({"error": "invalid credentials"})
+        return jsonify({"error": "Invalid credentials"})
 
     user = Users.query.filter_by(email=auth.username).first()
     if not user:
-        return jsonify({"error": "invalid credentials"})
+        return jsonify({"error": "Invalid credentials"})
 
     # verified path
     if bcrypt.checkpw(auth.password.encode('utf8'), user.password_hash.encode('utf8')):
@@ -166,7 +166,7 @@ def login():
 
         return jsonify(login_return_data)
 
-    return jsonify({"error": "invalid credentials"})
+    return jsonify({"error": "Invalid credentials"})
 
 
 # added this create user collection to sign up. leaving this just in case
@@ -219,7 +219,7 @@ def post_deck(current_user):
     data = request.get_json()
     exists = Decks.query.filter_by(deck_id=data['deck_id']).first()
     if exists is not None:
-        return jsonify({"error": "deck already exists"})
+        return jsonify({"error": "Deck already exists"})
     else:
         new_deck = Decks(
             deck_id=data['deck_id'],
