@@ -175,11 +175,23 @@ def login():
             }
             decks_meta.append(deck_meta)
 
-        # Preload up to 10 decks here? just get them all, up to 100? do speed tests to decide
+        # Preload up to 10 decks here..... just get them all, up to 100? do speed tests to decide
+        decks = []
+
+        if len(deck_ids) <= 10:
+            for deck_id in deck_ids:
+                dump = deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first())
+                decks.append(dump['deck'])
+        else:
+            deck_ids.sort(reverse=True)
+            for i in range(10):
+                dump = deck_schema.dump(Decks.query.filter_by(deck_id=deck_ids[i]).first())
+                decks.append(dump['deck'])
 
         login_return_data = {'user_collection': user_collection_schema.dump(user_collection),
                              'token': token.decode('UTF-8'),
-                             'decks_meta': decks_meta}
+                             'decks_meta': decks_meta,
+                             'decks': decks}
 
         return jsonify(login_return_data)
 
