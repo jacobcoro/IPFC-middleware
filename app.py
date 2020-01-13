@@ -306,9 +306,6 @@ def get_decks(current_user):
 @token_required
 def put_deck(current_user):
     data = request.get_json ()
-    print("recieved data: " + jsonify(data))
-    sys.stdout.flush()
-
     deck_update = Decks.query.filter_by(deck_id=data['deck_id']).first()
     pinata_api = current_user.pinata_api
     pinata_key = current_user.pinata_key
