@@ -346,8 +346,7 @@ def put_deck(current_user):
             }
         json_data_for_API["pinataContent"] = deck_schema.dump(deck_update)
         req = requests.post(pinata_json_url, json=json_data_for_API, headers=pinata_api_headers)
-        pinata_api_response = req.text
-        print("pinata pst deck response" + pinata_api_response)
+        pinata_api_response = json.loads(req.text)
         sys.stdout.flush()
         deck_cid = pinata_api_response["IpfsHash"]
         deck_update.deck_cid = deck_cid
