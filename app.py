@@ -9,6 +9,7 @@ import datetime
 from functools import wraps
 import os
 import requests
+import json
 from flask_cors import CORS, cross_origin
 import sys # Used to make print statements, add a line after print statement:
 # sys.stdout.flush()
@@ -306,7 +307,10 @@ def get_decks(current_user):
 @token_required
 def put_deck(current_user):
     data = request.get_json()
-    deck_id = data['deck_id']
+    print(json.dumps(data, indent=1))
+    sys.stdout.flush()
+
+    deck_id = data['deck']['deck_id']
     deck_update = Decks.query.filter_by(deck_id=deck_id).first()
     pinata_api = current_user.pinata_api
     pinata_key = current_user.pinata_key
