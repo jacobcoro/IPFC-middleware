@@ -305,11 +305,13 @@ def get_decks(current_user):
 @cross_origin(origin='*')
 @token_required
 def put_deck(current_user):
-    data = request.get_json()
+    data = request.get_json ()
+    print("recieved data: " + data)
+    sys.stdout.flush()
+
     deck_update = Decks.query.filter_by(deck_id=data['deck_id']).first()
-    user = Users.query.filter_by(email=auth.username).first()
-    pinata_api = user.pinata_api
-    pinata_key = user.pinata_key
+    pinata_api = current_user.pinata_api
+    pinata_key = current_user.pinata_key
     pinata_api_headers = {"Content-Type": "application/json", "pinata_api_key": pinata_api,
                           "pinata_secret_api_key": pinata_key}
     # Check IPFS metadata here-------
@@ -339,7 +341,7 @@ def put_deck(current_user):
         json_data_for_API["pinataMetadata"] = {"name": deck_update.title, "keyvalues": {"deck_id": deck_update.deck_id, "edited": deck_update.edited }}
         json_data_for_API["pinataContent"] = deck_schema.dump(deck_update)
         req = requests.post(pinata_json_url, json=json_data_for_API, headers=pinata_api_headers)
-        pinata_api_response = json.loads(req.text)
+        pinata_api_response = req.text
         print("pinata pst deck response" + pinata_api_response)
         sys.stdout.flush()
         deck_cid = pinata_api_response["IpfsHash"]
