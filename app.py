@@ -305,7 +305,7 @@ def get_decks(current_user):
 @cross_origin(origin='*')
 @token_required
 def put_deck(current_user):
-    data = request.get_json ()
+    data = request.get_json()
     deck_update = Decks.query.filter_by(deck_id=data['deck_id']).first()
     pinata_api = current_user.pinata_api
     pinata_key = current_user.pinata_key
