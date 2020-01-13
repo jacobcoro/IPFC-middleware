@@ -9,6 +9,9 @@ import datetime
 from functools import wraps
 import os
 from flask_cors import CORS, cross_origin
+import sys # Used to make print statements, add a line after print statement:
+# sys.stdout.flush()
+
 # remember to include uswgi, psycopg2, marshmallow-sqlalchemy in reqs.txt, also bcrypt==3.1.7 which pipreqs gets wrong:
 # psycopg2_binary==2.8.3
 # marshmallow-sqlalchemy==0.19.0
@@ -19,7 +22,7 @@ from flask_cors import CORS, cross_origin
 app = Flask(__name__)
 ma = Marshmallow(app)
 CORS(app)
-app.debug = True
+app.config['DEBUG'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SECRET_KEY'] = 'totally%@#$%^T@#Secure!'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -146,8 +149,9 @@ def sign_up():
 @app.route('/login')
 @cross_origin(origin='*')
 def login():
+    print("starting login" + str(datetime.datetime.utcnow()))
+    sys.stdout.flush()
     auth = request.authorization
-
     if not auth or not auth.username or not auth.password:
         return jsonify({"error": "Invalid credentials"})
 
@@ -157,12 +161,16 @@ def login():
 
     # verified path
     if bcrypt.checkpw(auth.password.encode('utf8'), user.password_hash.encode('utf8')):
-        token = jwt.encode({'user_id': user.user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)},
+        token = jwt.encode({'user_id': user.user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=3)},
                            app.config['SECRET_KEY'])
         # Get user collection
+        print("Getting user collection" + str(datetime.datetime.utcnow()))
+        sys.stdout.flush()
         user_collection = UserCollections.query.filter_by(user_id=user.user_id).first()
 
         # Get decks metadata
+        print("Getting decks meta" + str(datetime.datetime.utcnow()))
+        sys.stdout.flush()
         deck_ids = user_collection.deck_ids
         decks_meta = []
         for deck_id in deck_ids:
@@ -177,7 +185,8 @@ def login():
 
         # Preload up to 10 decks here..... just get them all, up to 100? do speed tests to decide
         decks = []
-
+        print("Getting decks" + str(datetime.datetime.utcnow()))
+        sys.stdout.flush()
         if len(deck_ids) <= 10:
             for deck_id in deck_ids:
                 dump = deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first())
@@ -192,7 +201,8 @@ def login():
                              'token': token.decode('UTF-8'),
                              'decks_meta': decks_meta,
                              'decks': decks}
-
+        print("returning" + str(datetime.datetime.utcnow()))
+        sys.stdout.flush()
         return jsonify(login_return_data)
 
     return jsonify({"error": "Invalid credentials"})
@@ -293,16 +303,20 @@ def get_decks(current_user):
 def put_deck(current_user):
     data = request.get_json()
     deck_update = Decks.query.filter_by(deck_id=data['deck_id']).first()
-
-    if 'deck' in data:
-        deck_update.deck = data['deck']
-    # If the deck is changed server-side remember to change edited and title in deck itself !!!
-    if 'title' in data:
-        deck_update.title = data['title']
-    if 'edited' in data:
-        deck_update.edited = data['edited']
-    if 'deck_cid' in data:
-        deck_update.deck_cid = data['deck_cid']
+    # Check IPFS here
+    # IPFS update metadata already have an upload date, but we are more concerned with actual edited date
+    # so metadata needs to attach an 'edited' key. Do an API call for that
+    # check edited date isn't older than one in database, if it is, return newest
+    if deck_update.edited < data['edited']:
+        if 'deck' in data:
+            deck_update.deck = data['deck']
+        # If the deck is changed server-side remember to change edited and title in deck itself !!!
+        if 'title' in data:
+            deck_update.title = data['title']
+        if 'edited' in data:
+            deck_update.edited = data['edited']
+        if 'deck_cid' in data:
+            deck_update.deck_cid = data['deck_cid']
 
     db.session.commit()
     return deck_schema.dump(deck_update)
