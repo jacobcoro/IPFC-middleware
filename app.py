@@ -271,7 +271,7 @@ def post_deck(current_user):
             title=data['title'],
             edited=data['edited'],
             deck_cid=data['deck_cid']
-        )
+            )
         db.session.add(new_deck)
         db.session.commit()
         return deck_schema.dump(new_deck)
@@ -306,7 +306,7 @@ def get_decks(current_user):
 @token_required
 def put_deck(current_user):
     data = request.get_json ()
-    print("recieved data: " + data)
+    print("recieved data: " + jsonify(data))
     sys.stdout.flush()
 
     deck_update = Decks.query.filter_by(deck_id=data['deck_id']).first()
@@ -338,7 +338,10 @@ def put_deck(current_user):
     # then if the pinata version wasn't the newest, upload to pinata
     # if pinata_data['edited'] < deck_update.edited or pinata_data['edited'] < data['edited']:
         json_data_for_API = {}
-        json_data_for_API["pinataMetadata"] = {"name": deck_update.title, "keyvalues": {"deck_id": deck_update.deck_id, "edited": deck_update.edited }}
+        json_data_for_API["pinataMetadata"] = {
+            "name": deck_update.title,
+            "keyvalues": {"deck_id": deck_update.deck_id, "edited": deck_update.edited}
+            }
         json_data_for_API["pinataContent"] = deck_schema.dump(deck_update)
         req = requests.post(pinata_json_url, json=json_data_for_API, headers=pinata_api_headers)
         pinata_api_response = req.text
@@ -373,11 +376,11 @@ def get_deck_meta(current_user):
     deck_id = data['deck_id']
     dump = deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first())
     deck_meta = {
-                'title': dump['title'],
-                'edited': dump['edited'],
-                'deck_cid': dump['deck_cid'],
-                'deck_id': dump['deck_id']
-                }
+        'title': dump['title'],
+        'edited': dump['edited'],
+        'deck_cid': dump['deck_cid'],
+        'deck_id': dump['deck_id']
+    }
     return jsonify(deck_meta)
 
 
@@ -391,11 +394,11 @@ def get_decks_meta(current_user):
     for deck_id in deck_ids:
         dump = deck_schema.dump(Decks.query.filter_by(deck_id=deck_id).first())
         deck_meta = {
-                    'title': dump['title'],
-                    'edited': dump['edited'],
-                    'deck_cid': dump['deck_cid'],
-                    'deck_id': dump['deck_id']
-                    }
+            'title': dump['title'],
+            'edited': dump['edited'],
+            'deck_cid': dump['deck_cid'],
+            'deck_id': dump['deck_id']
+        }
         decks_meta.append(deck_meta)
     return jsonify(decks_meta)
 
