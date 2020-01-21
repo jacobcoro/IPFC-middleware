@@ -353,23 +353,24 @@ def put_deck(current_user):
         if 'deck_cid' in data:
             deck_to_update.deck_cid = data['deck_cid']
         db.session.commit()
+        return jsonify({'message': 'Up to date'})
     # else return the database version saved as deck_to_update
 
     # then if the pinata version wasn't the newest, upload to pinata
     # if pinata_data['edited'] < deck_to_update.edited or pinata_data['edited'] < data['edited']:
-        json_data_for_API = {}
-        json_data_for_API["pinataMetadata"] = {
-            "name": deck_to_update.title,
-            "keyvalues": {"deck_id": deck_to_update.deck_id, "edited": deck_to_update.edited}
-            }
-        json_data_for_API["pinataContent"] = deck_schema.dump(deck_to_update)
-        req = requests.post(pinata_json_url, json=json_data_for_API, headers=pinata_api_headers)
-        pinata_api_response = json.loads(req.text)
-        print("uploaded deck to IPFS. Hash: " + pinata_api_response["IpfsHash"])
-        sys.stdout.flush()
-        deck_cid = pinata_api_response["IpfsHash"]
-        deck_to_update.deck_cid = deck_cid
-        db.session.commit()
+    json_data_for_API = {}
+    json_data_for_API["pinataMetadata"] = {
+        "name": deck_to_update.title,
+        "keyvalues": {"deck_id": deck_to_update.deck_id, "edited": deck_to_update.edited}
+        }
+    json_data_for_API["pinataContent"] = deck_schema.dump(deck_to_update)
+    req = requests.post(pinata_json_url, json=json_data_for_API, headers=pinata_api_headers)
+    pinata_api_response = json.loads(req.text)
+    print("uploaded deck to IPFS. Hash: " + pinata_api_response["IpfsHash"])
+    sys.stdout.flush()
+    deck_cid = pinata_api_response["IpfsHash"]
+    deck_to_update.deck_cid = deck_cid
+    db.session.commit()
 
     return deck_schema.dump(deck_to_update)
 
